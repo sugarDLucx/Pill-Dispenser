@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Set Schedule Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#e5e2e1",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#eec200",
+                        "background": "#fcf9f8",
+                        "on-secondary-container": "#fefcff",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#001a42",
+                        "secondary-container": "#2170e4",
+                        "tertiary-fixed": "#ffe083",
+                        "primary-fixed-dim": "#4ae176",
+                        "surface-container": "#f0eded",
+                        "secondary": "#0058be",
+                        "on-tertiary-fixed": "#231b00",
+                        "surface-container-low": "#f6f3f2",
+                        "on-background": "#1c1b1b",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#313030",
+                        "on-surface-variant": "#3d4a3d",
+                        "tertiary-container": "#cfa800",
+                        "on-tertiary-container": "#4f3e00",
+                        "primary": "#006e2f",
+                        "on-primary-fixed": "#002109",
+                        "surface-variant": "#e5e2e1",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "primary-container": "#22c55e",
+                        "inverse-on-surface": "#f3f0ef",
+                        "on-tertiary-fixed-variant": "#574500",
+                        "surface-dim": "#dcd9d9",
+                        "surface": "#fcf9f8",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#d8e2ff",
+                        "outline": "#6d7b6c",
+                        "inverse-primary": "#4ae176",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "primary-fixed": "#6bff8f",
+                        "surface-tint": "#006e2f",
+                        "outline-variant": "#bccbb9",
+                        "tertiary": "#735c00",
+                        "on-primary-container": "#004b1e",
+                        "surface-container-high": "#eae7e7",
+                        "on-surface": "#1c1b1b",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "surface-bright": "#fcf9f8",
+                        "on-primary-fixed-variant": "#005321"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "touch-target-min": "64px",
+                        "stack-gap": "16px",
+                        "margin-page": "40px",
+                        "unit": "8px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Atkinson Hyperlegible Next"],
+                        "label-lg": ["Atkinson Hyperlegible Next"],
+                        "body-lg": ["Atkinson Hyperlegible Next"],
+                        "display-lg": ["Atkinson Hyperlegible Next"],
+                        "body-md": ["Atkinson Hyperlegible Next"],
+                        "headline-lg": ["Atkinson Hyperlegible Next"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["28px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "label-lg": ["18px", { "lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-lg": ["24px", { "lineHeight": "1.5", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-md": ["20px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-lg": ["36px", { "lineHeight": "1.2", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .tactile-shadow {
+                box-shadow: 0 8px 16px -4px rgba(28, 27, 27, 0.15);
+            }
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen relative overflow-hidden flex justify-center items-center">
+<!-- Mock Dashboard Background -->
+<div class="absolute inset-0 z-0 p-margin-page flex flex-col md:flex-row gap-gutter opacity-30 pointer-events-none">
+<div class="w-full md:w-[60%] flex flex-col gap-stack-gap">
+<div class="bg-surface-container h-[400px] rounded-xl border-2 border-surface-variant flex items-center justify-center">
+<span class="font-headline-lg text-headline-lg text-on-surface-variant">Active Dose</span>
+</div>
+</div>
+<div class="w-full md:w-[40%] flex flex-col gap-stack-gap">
+<div class="bg-surface-container h-full rounded-xl border-2 border-surface-variant flex items-center justify-center">
+<span class="font-headline-md text-headline-md text-on-surface-variant">Schedule</span>
+</div>
+</div>
+</div>
+<!-- Modal Overlay Backdrop -->
+<div class="absolute inset-0 bg-on-background/60 z-40 backdrop-blur-sm" id="modalBackdrop"></div>
+<!-- Set Schedule Modal -->
+<div aria-labelledby="modal-title" aria-modal="true" class="relative z-50 bg-surface-container-lowest rounded-xl shadow-[0_24px_48px_-12px_rgba(0,0,0,0.25)] w-full max-w-[800px] mx-margin-page my-margin-page flex flex-col max-h-[90vh] overflow-hidden" role="dialog">
+<!-- Header -->
+<div class="bg-surface-container flex items-center justify-between px-gutter py-stack-gap border-b-2 border-surface-variant">
+<h2 class="font-headline-lg text-headline-lg text-on-surface m-0 flex items-center gap-unit" id="modal-title">
+<span class="material-symbols-outlined text-[40px] text-primary" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+                Schedule Medication - Slot 3
+            </h2>
+<button aria-label="Close modal" class="h-touch-target-min w-touch-target-min flex items-center justify-center rounded-full hover:bg-surface-container-highest transition-colors focus:outline-none focus:ring-4 focus:ring-primary/50">
+<span class="material-symbols-outlined text-[32px] text-on-surface-variant">close</span>
+</button>
+</div>
+<!-- Scrollable Content -->
+<div class="overflow-y-auto p-gutter flex flex-col gap-stack-gap">
+<!-- Medicine Name Input -->
+<div class="flex flex-col gap-unit">
+<label class="font-label-lg text-label-lg text-on-surface" for="medName">Medicine Name</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-[32px]">pill</span>
+<input class="w-full h-[80px] pl-16 pr-4 rounded-lg border-2 border-outline-variant bg-surface-container-lowest font-body-lg text-body-lg text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all placeholder:text-on-surface-variant/50" id="medName" placeholder="e.g., Metformin" type="text"/>
+</div>
+</div>
+<!-- Frequency Dropdown -->
+<div class="flex flex-col gap-unit">
+<label class="font-label-lg text-label-lg text-on-surface" for="freqSelect">Frequency</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-[32px]">update</span>
+<select class="w-full h-[80px] pl-16 pr-12 rounded-lg border-2 border-outline-variant bg-surface-container-lowest font-body-lg text-body-lg text-on-surface appearance-none focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all cursor-pointer" id="freqSelect">
+<option value="daily">Daily</option>
+<option value="twice_daily">Twice Daily</option>
+<option value="weekly">Weekly</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-[32px] pointer-events-none">arrow_drop_down</span>
+</div>
+</div>
+<!-- Times List -->
+<div class="flex flex-col gap-unit mt-stack-gap">
+<label class="font-label-lg text-label-lg text-on-surface">Scheduled Times</label>
+<!-- Existing Time Slot -->
+<div class="bg-surface flex items-center justify-between p-4 rounded-lg border-2 border-surface-variant">
+<div class="flex items-center gap-unit">
+<span class="material-symbols-outlined text-[32px] text-secondary">schedule</span>
+<span class="font-headline-md text-headline-md text-on-surface">08:00 AM</span>
+</div>
+<button aria-label="Remove time" class="h-[64px] w-[64px] flex items-center justify-center rounded-lg border-2 border-error text-error hover:bg-error-container focus:outline-none focus:ring-4 focus:ring-error/50 transition-colors">
+<span class="material-symbols-outlined text-[28px]">delete</span>
+</button>
+</div>
+<!-- Add Time Button -->
+<button class="w-full min-h-[80px] flex items-center justify-center gap-unit rounded-lg border-4 border-dashed border-primary/50 text-primary hover:bg-primary/5 focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all mt-unit tactile-shadow bg-surface-container-lowest">
+<span class="material-symbols-outlined text-[36px]" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-headline-md text-headline-md m-0">+ Add Time</span>
+</button>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="bg-surface-container flex flex-col md:flex-row justify-end gap-stack-gap p-gutter border-t-2 border-surface-variant mt-auto">
+<button class="min-h-touch-target-min px-8 rounded-lg font-headline-md text-headline-md text-on-surface bg-surface-variant hover:bg-surface-dim focus:outline-none focus:ring-4 focus:ring-on-surface/20 transition-all w-full md:w-auto flex-1 md:flex-none">
+                Cancel
+            </button>
+<button class="min-h-touch-target-min px-8 rounded-lg font-headline-md text-headline-md text-on-primary bg-primary hover:bg-on-primary-container focus:outline-none focus:ring-4 focus:ring-primary/50 transition-all tactile-shadow w-full md:w-auto flex-[2] md:flex-none flex items-center justify-center gap-unit">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">save</span>
+                Save Schedule
+            </button>
+</div>
+</div>
+<script>
+        // Simple script to handle modal backdrop click for demonstration
+        document.getElementById('modalBackdrop').addEventListener('click', function() {
+            // In a real app, this would close the modal or trigger a confirmation
+            console.log('Backdrop clicked');
+        });
+    </script>
+</body></html>

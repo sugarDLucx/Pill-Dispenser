@@ -1,0 +1,103 @@
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from typing import List, Optional
+from datetime import date
+import threading
+
+from backend.database import engine, Base, get_db
+from backend.models import MedicationSchedule, SystemSettings
+from backend.hardware_daemon import mark_medicine_taken, main_loop, current_temperature
+
+# Create tables
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="Smart Pill Dispenser API")
+
+# Allow CORS for React frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Start hardware daemon in background
+@app.on_event("startup")
+def startup_event():
+    daemon_thread = threading.Thread(target=main_loop, daemon=True)
+    daemon_thread.start()
+
+# --- Pydantic Models ---
+class ScheduleCreate(BaseModel):
+    compartment_id: int
+    medicine_name: str
+    frequency: str
+    time_slots: str
+    start_date: date
+    end_date: date
+
+class ScheduleResponse(ScheduleCreate):
+    class Config:
+        orm_mode = True
+
+class SettingsUpdate(BaseModel):
+    caretaker_primary_mobile: str
+    caretaker_secondary_mobile: Optional[str] = ""
+
+# --- Endpoints ---
+@app.get("/api/schedule", response_model=List[ScheduleResponse])
+def get_schedules(db: Session = Depends(get_db)):
+    return db.query(MedicationSchedule).all()
+
+@app.post("/api/schedule", response_model=ScheduleResponse)
+def create_or_update_schedule(schedule: ScheduleCreate, db: Session = Depends(get_db)):
+    db_schedule = db.query(MedicationSchedule).filter(MedicationSchedule.compartment_id == schedule.compartment_id).first()
+    if db_schedule:
+        for key, value in schedule.dict().items():
+            setattr(db_schedule, key, value)
+    else:
+        db_schedule = MedicationSchedule(**schedule.dict())
+        db.add(db_schedule)
+    db.commit()
+    db.refresh(db_schedule)
+    return db_schedule
+
+@app.post("/api/settings")
+def update_settings(settings: SettingsUpdate, db: Session = Depends(get_db)):
+    db_settings = db.query(SystemSettings).first()
+    if db_settings:
+        db_settings.caretaker_primary_mobile = settings.caretaker_primary_mobile
+        db_settings.caretaker_secondary_mobile = settings.caretaker_secondary_mobile
+    else:
+        db_settings = SystemSettings(**settings.dict())
+        db.add(db_settings)
+    db.commit()
+    return {"status": "success"}
+
+@app.get("/api/status")
+def get_status(db: Session = Depends(get_db)):
+    # Calculate next dose
+    schedules = db.query(MedicationSchedule).all()
+    next_dose_time = "None"
+    next_dose_med = "None"
+    # A real implementation would parse times and find the closest future time
+    # For simplicity, returning a placeholder or basic logic
+    if schedules:
+        next_dose_time = schedules[0].time_slots.split(",")[0]
+        next_dose_med = schedules[0].medicine_name
+
+    return {
+        "temperature": current_temperature,
+        "next_dose_time": next_dose_time,
+        "next_dose_med": next_dose_med,
+        "network_status": "Connected",
+        "gsm_status": "Active"
+    }
+
+@app.post("/api/medicine-taken")
+def medicine_taken():
+    mark_medicine_taken()
+    return {"status": "Alarm Cancelled"}
