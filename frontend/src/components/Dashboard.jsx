@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Decagon from './Decagon';
+import ScheduleModal from './ScheduleModal';
 import { fetchStatus, fetchSchedules, markMedicineTaken } from '../api';
 
 const Dashboard = () => {
   const [schedules, setSchedules] = useState([]);
   const [status, setStatus] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // State for modal
+  const [modalSlot, setModalSlot] = useState(null);
 
   // Simulate active slot based on status
   // In a real app, backend status might return the active slot ID directly.
@@ -16,13 +20,14 @@ const Dashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const loadData = async () => {
+    const sch = await fetchSchedules();
+    if (sch) setSchedules(sch);
+    const st = await fetchStatus();
+    if (st) setStatus(st);
+  };
+
   useEffect(() => {
-    const loadData = async () => {
-      const sch = await fetchSchedules();
-      if (sch) setSchedules(sch);
-      const st = await fetchStatus();
-      if (st) setStatus(st);
-    };
     loadData();
     const poll = setInterval(loadData, 5000);
     return () => clearInterval(poll);
@@ -34,8 +39,7 @@ const Dashboard = () => {
   };
 
   const handleSlotClick = (id) => {
-    // Open a modal to schedule this slot
-    console.log("Clicked slot:", id);
+    setModalSlot(id);
   };
 
   return (
@@ -85,6 +89,14 @@ const Dashboard = () => {
 
       </section>
 
+      {modalSlot !== null && (
+        <ScheduleModal 
+          slotId={modalSlot} 
+          initialData={schedules.find(s => s.compartment_id === modalSlot) || null}
+          onClose={() => setModalSlot(null)}
+          onSave={loadData}
+        />
+      )}
     </div>
   );
 };
