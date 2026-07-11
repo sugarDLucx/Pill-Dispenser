@@ -49,12 +49,15 @@ SIM_UART_PORT = "/dev/ttyS0"
 SIM_BAUDRATE = 9600
 
 # Initialize Hardware Variables
+med_button = None
+cooling_relay = None
 try:
     med_button = Button(BUTTON_PIN)
     cooling_relay = OutputDevice(RELAY_PIN)
 except Exception as e:
     print(f"Error initializing GPIO: {e}")
 
+servos = {}
 try:
     i2c = busio.I2C(board.SCL, board.SDA) if board else None
     pca = PCA9685(i2c) if i2c else PCA9685(None)
@@ -64,6 +67,7 @@ try:
 except Exception as e:
     print(f"Error initializing PCA9685: {e}")
 
+dht_device = None
 try:
     dht_device = adafruit_dht.DHT11(getattr(board, f'D{DHT_PIN}')) if board else adafruit_dht.DHT11(None)
 except Exception as e:
@@ -148,9 +152,9 @@ def temp_monitoring_loop():
                 if temp is not None:
                     current_temperature = temp
                     if temp > 25:
-                        cooling_relay.on()
+                        if cooling_relay: cooling_relay.on()
                     else:
-                        cooling_relay.off()
+                        if cooling_relay: cooling_relay.off()
         except RuntimeError as error:
             # Errors happen fairly often, DHT's are hard to read, just keep going
             pass
