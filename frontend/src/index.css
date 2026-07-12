@@ -27,5 +27,17 @@
 }
 
 body {
-  @apply bg-background text-on-background min-h-screen flex flex-col font-body-lg selection:bg-secondary selection:text-on-secondary;
+  @apply bg-background text-on-background h-screen w-screen overflow-hidden select-none flex flex-col font-body-lg selection:bg-secondary selection:text-on-secondary;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+img, svg, button {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
 }
