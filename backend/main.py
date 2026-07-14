@@ -106,7 +106,7 @@ def get_status(db: Session = Depends(get_db)):
         ampm = "PM" if hour >= 12 else "AM"
         hour = hour % 12
         hour = hour if hour else 12
-        next_dose_time = f"{hour}:{m} {ampm}"
+        next_dose_time = f"{hour:02d}:{m} {ampm}"
         next_dose_med = closest_med
 
     return {
