@@ -89,25 +89,40 @@ def get_status(db: Session = Depends(get_db)):
     
     closest_time = None
     closest_med = None
+    earliest_time = None
+    earliest_med = None
     
     for schedule in schedules:
         if not schedule.time_slots: continue
         slots = schedule.time_slots.split(",")
         for slot in slots:
             slot = slot.strip()
+            
+            # Track the absolute earliest slot in the day (for tomorrow's wraparound)
+            if earliest_time is None or slot < earliest_time:
+                earliest_time = slot
+                earliest_med = schedule.medicine_name
+
+            # Track the closest future slot (for today)
             if slot > current_time_str:
                 if closest_time is None or slot < closest_time:
                     closest_time = slot
                     closest_med = schedule.medicine_name
                     
-    if closest_time:
-        h, m = closest_time.split(":")
+    # If a future time exists today, use it. Otherwise, use tomorrow's earliest time.
+    next_time_val = closest_time if closest_time else earliest_time
+    next_med_val = closest_med if closest_time else earliest_med
+                    
+    if next_time_val:
+        h, m = next_time_val.split(":")
         hour = int(h)
         ampm = "PM" if hour >= 12 else "AM"
         hour = hour % 12
         hour = hour if hour else 12
         next_dose_time = f"{hour:02d}:{m} {ampm}"
-        next_dose_med = closest_med
+        if not closest_time and next_time_val:
+            next_dose_time += " (Tomorrow)"
+        next_dose_med = next_med_val
 
     return {
         "temperature": current_temperature,
