@@ -78,7 +78,27 @@ const Decagon = ({ schedules, activeSlot, onSlotClick }) => {
                 <>
                   <text x={pos.x} y={pos.y - 10} textAnchor="middle" fontSize="11" fontWeight="bold" fill="#1c1b1b" className="pointer-events-none">{schedule.medicine_name.length > 10 ? schedule.medicine_name.substring(0,8)+'...' : schedule.medicine_name}</text>
                   <text x={pos.x} y={pos.y + 2} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">{schedule.frequency === 'twice_daily' ? '2x Daily' : schedule.frequency.charAt(0).toUpperCase() + schedule.frequency.slice(1)}</text>
-                  <text x={pos.x} y={pos.y + 14} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">{formatTime12hr(schedule.time_slots.split(',')[0])}</text>
+                  {(() => {
+                    const slots = schedule.time_slots.split(',').filter(t => t.trim() !== '');
+                    if (slots.length === 0) return null;
+                    if (slots.length === 1) {
+                      return <text x={pos.x} y={pos.y + 14} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">{formatTime12hr(slots[0])}</text>;
+                    }
+                    if (slots.length === 2) {
+                      return (
+                        <g>
+                          <text x={pos.x} y={pos.y + 14} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">{formatTime12hr(slots[0])}</text>
+                          <text x={pos.x} y={pos.y + 24} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">{formatTime12hr(slots[1])}</text>
+                        </g>
+                      );
+                    }
+                    return (
+                        <g>
+                          <text x={pos.x} y={pos.y + 14} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">{formatTime12hr(slots[0])}</text>
+                          <text x={pos.x} y={pos.y + 24} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">+{slots.length - 1} more</text>
+                        </g>
+                    );
+                  })()}
                 </>
               ) : (
                 <text x={pos.x} y={pos.y + 4} textAnchor="middle" fontSize="12" fill="#6d7b6c" className="pointer-events-none">Empty</text>
