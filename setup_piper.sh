@@ -9,9 +9,21 @@ echo "Starting Piper TTS setup for Raspberry Pi (AArch64)..."
 mkdir -p backend/piper
 cd backend/piper
 
-# Download Piper binary for aarch64
-echo "Downloading Piper..."
-wget -qO piper.tar.gz https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_aarch64.tar.gz
+echo "Detecting OS architecture..."
+ARCH=$(uname -m)
+if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+    PIPER_URL="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_aarch64.tar.gz"
+elif [ "$ARCH" = "armv7l" ] || [ "$ARCH" = "armhf" ] || [ "$ARCH" = "armv6l" ]; then
+    PIPER_URL="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_armv7l.tar.gz"
+else
+    # Fallback to aarch64 if unknown, but warn
+    echo "Warning: Unknown architecture $ARCH. Defaulting to aarch64."
+    PIPER_URL="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_aarch64.tar.gz"
+fi
+
+# Download Piper binary
+echo "Downloading Piper from $PIPER_URL ..."
+wget -qO piper.tar.gz "$PIPER_URL"
 
 # Extract
 echo "Extracting Piper..."
