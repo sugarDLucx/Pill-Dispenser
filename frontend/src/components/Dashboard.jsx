@@ -10,6 +10,9 @@ const Dashboard = () => {
   
   // State for modal
   const [modalSlot, setModalSlot] = useState(null);
+  
+  // State for legend tooltip
+  const [showLegend, setShowLegend] = useState(false);
 
   // Simulate active slot based on status
   // In a real app, backend status might return the active slot ID directly.
@@ -47,6 +50,36 @@ const Dashboard = () => {
       
       {/* Left Pane (60%): Interactive Dispenser View */}
       <section className="w-full md:w-[60%] flex flex-col items-center justify-center bg-surface-container-lowest rounded-xl border-2 border-surface-variant relative shadow-lg p-8">
+        
+        {/* Legend Button */}
+        <div className="absolute top-4 left-4 z-10">
+          <button 
+            onClick={() => setShowLegend(!showLegend)}
+            className="flex items-center gap-2 bg-surface-container px-4 py-2 rounded-full border-2 border-surface-variant hover:bg-surface-variant transition-colors"
+          >
+            <span className="material-symbols-outlined text-[24px] text-on-surface-variant">help</span>
+            <span className="font-label-lg text-on-surface">Legend</span>
+          </button>
+          
+          {/* Legend Tooltip */}
+          {showLegend && (
+            <div className="absolute top-14 left-0 bg-surface-container-highest border-2 border-surface-variant rounded-xl p-4 shadow-xl w-64 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-md bg-surface-container border-2 border-surface-dim"></div>
+                <span className="font-body-md text-on-surface">Empty Slot</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-md bg-secondary-fixed border-2 border-secondary-fixed-dim"></div>
+                <span className="font-body-md text-on-surface">Scheduled Slot</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-md bg-tertiary-fixed border-2 border-tertiary-fixed-dim animate-pulse"></div>
+                <span className="font-body-md text-on-surface">Active (Time to Take!)</span>
+              </div>
+            </div>
+          )}
+        </div>
+
         <Decagon schedules={schedules} activeSlot={activeSlot} onSlotClick={handleSlotClick} />
         
         <div className="mt-12 text-center">

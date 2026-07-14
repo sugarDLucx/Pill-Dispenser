@@ -48,16 +48,36 @@ const Decagon = ({ schedules, activeSlot, onSlotClick }) => {
           </filter>
         </defs>
         
-        {wedges.map((wedge) => (
-          <path 
-            key={wedge.id}
-            d={wedge.path} 
-            className={`transition-all ${getSlotStyle(wedge.id)}`}
-            onClick={() => onSlotClick(wedge.id)}
-          />
-        ))}
+        {wedges.map((wedge) => {
+          const schedule = schedules.find(s => s.compartment_id === wedge.id);
+          const angleDeg = -90 + 18 + (wedge.id - 1) * 36;
+          const angleRad = angleDeg * Math.PI / 180;
+          const r = 140; 
+          const pos = {
+            x: 200 + r * Math.cos(angleRad),
+            y: 200 + r * Math.sin(angleRad)
+          };
+          
+          return (
+            <g key={wedge.id} className="cursor-pointer" onClick={() => onSlotClick(wedge.id)}>
+              <path 
+                d={wedge.path} 
+                className={`transition-all ${getSlotStyle(wedge.id)} pointer-events-none`}
+              />
+              {schedule ? (
+                <>
+                  <text x={pos.x} y={pos.y - 10} textAnchor="middle" fontSize="11" fontWeight="bold" fill="#1c1b1b" className="pointer-events-none">{schedule.medicine_name.length > 10 ? schedule.medicine_name.substring(0,8)+'...' : schedule.medicine_name}</text>
+                  <text x={pos.x} y={pos.y + 2} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">{schedule.frequency === 'twice_daily' ? '2x Daily' : schedule.frequency.charAt(0).toUpperCase() + schedule.frequency.slice(1)}</text>
+                  <text x={pos.x} y={pos.y + 14} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">{schedule.time_slots.split(',')[0]}</text>
+                </>
+              ) : (
+                <text x={pos.x} y={pos.y + 4} textAnchor="middle" fontSize="12" fill="#6d7b6c" className="pointer-events-none">Empty</text>
+              )}
+            </g>
+          );
+        })}
 
-        <circle cx="200" cy="200" r="80" className="fill-surface stroke-surface-container-high stroke-[4px]" filter="url(#inner-shadow)" />
+        <circle cx="200" cy="200" r="80" className="fill-surface stroke-surface-container-high stroke-[4px] pointer-events-none" filter="url(#inner-shadow)" />
       </svg>
       
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
