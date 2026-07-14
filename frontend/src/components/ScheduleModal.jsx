@@ -14,7 +14,7 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
         setTimeSlots(initialData.time_slots.split(','));
       }
     }
-  }, [initialData]);
+  }, [slotId]); // Only reset when slotId changes, ignore background polling updates
 
   const handleAddTime = () => {
     // Add a default time, in a real app this would open a time picker
