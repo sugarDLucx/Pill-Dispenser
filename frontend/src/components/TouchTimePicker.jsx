@@ -5,7 +5,10 @@ const ScrollColumn = ({ items, value, onChange, label }) => {
   const containerRef = useRef(null);
   const itemHeight = 60; // 60px height per item
   const [isScrolling, setIsScrolling] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const scrollTimeout = useRef(null);
+  const startY = useRef(null);
+  const startScrollTop = useRef(0);
 
   useEffect(() => {
     const index = items.indexOf(value);
@@ -28,7 +31,7 @@ const ScrollColumn = ({ items, value, onChange, label }) => {
         onChange(items[index]);
       }
       // Snap to exact position to correct any slight off-by-pixel
-      if (containerRef.current) {
+      if (containerRef.current && !isDragging) {
         containerRef.current.scrollTo({
           top: index * itemHeight,
           behavior: 'smooth'
@@ -37,22 +40,58 @@ const ScrollColumn = ({ items, value, onChange, label }) => {
     }, 150);
   };
 
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    startY.current = e.pageY;
+    startScrollTop.current = containerRef.current.scrollTop;
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const y = e.pageY;
+    const walk = (y - startY.current) * 1.5;
+    containerRef.current.scrollTop = startScrollTop.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleItemClick = (index) => {
+    // Only register as a tap if we didn't just drag
+    if (!isDragging) {
+      if (containerRef.current) {
+        containerRef.current.scrollTo({
+          top: index * itemHeight,
+          behavior: 'smooth'
+        });
+      }
+      onChange(items[index]);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center flex-1 relative h-full">
       <div className="font-label-lg text-label-lg text-on-surface-variant mb-2 absolute -top-8">{label}</div>
       <div 
         ref={containerRef}
         onScroll={handleScroll}
-        className="h-[180px] w-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative z-10"
-        style={{ scrollBehavior: isScrolling ? 'auto' : 'smooth' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUpOrLeave}
+        onMouseLeave={handleMouseUpOrLeave}
+        className="h-[180px] w-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative z-10 cursor-grab active:cursor-grabbing"
+        style={{ scrollBehavior: (isScrolling && !isDragging) ? 'auto' : 'smooth' }}
       >
         <div style={{ height: '60px' }}></div> {/* Top padding */}
-        {items.map((item) => {
+        {items.map((item, index) => {
           const isSelected = item === value;
           return (
             <div 
-              key={item} 
-              className={`h-[60px] flex items-center justify-center snap-center font-headline-lg text-3xl transition-all duration-200 select-none ${isSelected ? 'text-primary font-bold scale-110' : 'text-on-surface-variant/40 scale-90'}`}
+              key={item}
+              onClick={() => handleItemClick(index)}
+              className={`h-[60px] flex items-center justify-center snap-center font-headline-lg text-3xl transition-all duration-200 select-none cursor-pointer ${isSelected ? 'text-primary font-bold scale-110' : 'text-on-surface-variant/40 scale-90'}`}
             >
               {item}
             </div>
