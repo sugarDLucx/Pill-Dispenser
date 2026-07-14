@@ -10,15 +10,13 @@ mkdir -p backend/piper
 cd backend/piper
 
 echo "Detecting OS architecture..."
-ARCH=$(uname -m)
-if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+BITNESS=$(getconf LONG_BIT)
+if [ "$BITNESS" = "64" ]; then
+    echo "Detected 64-bit OS user space."
     PIPER_URL="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_aarch64.tar.gz"
-elif [ "$ARCH" = "armv7l" ] || [ "$ARCH" = "armhf" ] || [ "$ARCH" = "armv6l" ]; then
-    PIPER_URL="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_armv7l.tar.gz"
 else
-    # Fallback to aarch64 if unknown, but warn
-    echo "Warning: Unknown architecture $ARCH. Defaulting to aarch64."
-    PIPER_URL="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_aarch64.tar.gz"
+    echo "Detected 32-bit OS user space."
+    PIPER_URL="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_armv7l.tar.gz"
 fi
 
 # Download Piper binary
