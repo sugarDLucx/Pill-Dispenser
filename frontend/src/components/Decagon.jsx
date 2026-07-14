@@ -18,6 +18,16 @@ const Decagon = ({ schedules, activeSlot, onSlotClick }) => {
     { id: 10, path: "M 200 200 L 94.2 54.4 L 200 20 Z" }
   ];
 
+  const formatTime12hr = (timeStr) => {
+    if (!timeStr) return '';
+    const [h, m] = timeStr.split(':');
+    let hour = parseInt(h, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12;
+    hour = hour || 12; // 0 becomes 12
+    return `${hour}:${m} ${ampm}`;
+  };
+
   const getSlotStyle = (id) => {
     if (activeSlot === id) {
       return "fill-tertiary-fixed stroke-tertiary-fixed-dim stroke-2 cursor-pointer hover:brightness-110 animate-pulse";
@@ -68,7 +78,7 @@ const Decagon = ({ schedules, activeSlot, onSlotClick }) => {
                 <>
                   <text x={pos.x} y={pos.y - 10} textAnchor="middle" fontSize="11" fontWeight="bold" fill="#1c1b1b" className="pointer-events-none">{schedule.medicine_name.length > 10 ? schedule.medicine_name.substring(0,8)+'...' : schedule.medicine_name}</text>
                   <text x={pos.x} y={pos.y + 2} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">{schedule.frequency === 'twice_daily' ? '2x Daily' : schedule.frequency.charAt(0).toUpperCase() + schedule.frequency.slice(1)}</text>
-                  <text x={pos.x} y={pos.y + 14} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">{schedule.time_slots.split(',')[0]}</text>
+                  <text x={pos.x} y={pos.y + 14} textAnchor="middle" fontSize="9" fill="#3d4a3d" className="pointer-events-none">{formatTime12hr(schedule.time_slots.split(',')[0])}</text>
                 </>
               ) : (
                 <text x={pos.x} y={pos.y + 4} textAnchor="middle" fontSize="12" fill="#6d7b6c" className="pointer-events-none">Empty</text>
