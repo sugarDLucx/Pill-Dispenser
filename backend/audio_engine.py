@@ -53,30 +53,42 @@ def play_announcement(medicine_name: str):
 
     # To queue seamlessly, we play the first, queue the second, then wait and queue the third
     # Actually, a simple approach is to wait for each to finish or use pygame channels
-    try:
-        sound1 = pygame.mixer.Sound(INTRO_WAV)
-        sound2 = pygame.mixer.Sound(medicine_wav)
-        sound3 = pygame.mixer.Sound(OUTRO_WAV)
+    # Helper to safely load a sound
+    def safe_load_sound(path):
+        if not os.path.exists(path) or os.path.getsize(path) < 44:
+            return None
+        try:
+            return pygame.mixer.Sound(path)
+        except pygame.error:
+            return None
 
-        channel = pygame.mixer.find_channel()
-        if not channel:
-            return
+    sound1 = safe_load_sound(INTRO_WAV)
+    sound2 = safe_load_sound(medicine_wav)
+    sound3 = safe_load_sound(OUTRO_WAV)
 
-        channel.play(sound1)
+    channel = pygame.mixer.find_channel()
+    if not channel:
+        return
+
+    # Play valid sounds in sequence
+    sounds_to_play = [s for s in [sound1, sound2, sound3] if s is not None]
+    
+    if not sounds_to_play:
+        print("No valid audio files to play.")
+        return
+
+    # Play first sound
+    channel.play(sounds_to_play[0])
+    
+    # Queue remaining sounds
+    for i in range(1, len(sounds_to_play)):
         while channel.get_queue():
             pygame.time.wait(10)
-        channel.queue(sound2)
+        channel.queue(sounds_to_play[i])
         
-        # Wait until sound1 is done, then queue sound 3
-        while channel.get_sound() == sound1:
+        # Wait until the currently playing sound finishes before queuing the next
+        while channel.get_sound() == sounds_to_play[i-1]:
             pygame.time.wait(10)
-        channel.queue(sound3)
-
-    except FileNotFoundError as e:
-        print(f"Audio file missing: {e}")
-    except pygame.error as e:
-        # Might occur if files are empty/invalid dummy files on Windows without Piper
-        print(f"Pygame error loading sounds: {e}")
 
 if __name__ == "__main__":
     initialize_static_audio()
