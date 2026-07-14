@@ -72,7 +72,7 @@ const Decagon = ({ schedules, activeSlot, onSlotClick }) => {
             <g key={wedge.id} className="cursor-pointer" onClick={() => onSlotClick(wedge.id)}>
               <path 
                 d={wedge.path} 
-                className={`transition-all ${getSlotStyle(wedge.id)} pointer-events-none`}
+                className={`transition-all ${getSlotStyle(wedge.id)}`}
               />
               {schedule ? (
                 <>
