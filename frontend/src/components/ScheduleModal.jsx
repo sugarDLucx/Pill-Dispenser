@@ -57,7 +57,7 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
       start_date: today,
       end_date: endDate
     };
-    
+
     await updateSchedule(data);
     onSave();
     onClose();
@@ -66,8 +66,8 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
   return (
     <>
       <div className="absolute inset-0 bg-on-background/60 z-40 backdrop-blur-sm" onClick={onClose}></div>
-      <div 
-        role="dialog" 
+      <div
+        role="dialog"
         className="absolute z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface-container-lowest rounded-xl shadow-[0_24px_48px_-12px_rgba(0,0,0,0.25)] w-full max-w-[800px] flex flex-col max-h-[90vh] overflow-hidden"
       >
         <div className="bg-surface-container flex items-center justify-between px-gutter py-stack-gap border-b-2 border-surface-variant">
@@ -85,13 +85,13 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
             <label className="font-label-lg text-label-lg text-on-surface" htmlFor="medName">Medicine Name</label>
             <div className="relative">
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-[32px]">pill</span>
-              <input 
-                id="medName" 
-                type="text" 
-                placeholder="e.g., Metformin" 
+              <input
+                id="medName"
+                type="text"
+                placeholder="e.g., Metformin"
                 value={medicineName}
                 onChange={(e) => setMedicineName(e.target.value)}
-                className="w-full h-[80px] pl-16 pr-4 rounded-lg border-2 border-outline-variant bg-surface-container-lowest font-body-lg text-body-lg text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all placeholder:text-on-surface-variant/50" 
+                className="w-full h-[80px] pl-16 pr-4 rounded-lg border-2 border-outline-variant bg-surface-container-lowest font-body-lg text-body-lg text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all placeholder:text-on-surface-variant/50"
               />
             </div>
           </div>
@@ -100,7 +100,7 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
             <label className="font-label-lg text-label-lg text-on-surface" htmlFor="freqSelect">Frequency</label>
             <div className="relative">
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-[32px]">update</span>
-              <select 
+              <select
                 id="freqSelect"
                 value={frequency}
                 onChange={(e) => setFrequency(e.target.value)}
@@ -116,10 +116,10 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
 
           <div className="flex flex-col gap-unit mt-stack-gap">
             <label className="font-label-lg text-label-lg text-on-surface">Scheduled Times</label>
-            
+
             {timeSlots.map((time, index) => (
               <div key={index} className="bg-surface flex items-center justify-between p-4 rounded-lg border-2 border-surface-variant mt-2 shadow-sm">
-                <div 
+                <div
                   className="flex items-center gap-4 cursor-pointer flex-1 py-2 active:scale-95 transition-transform"
                   onClick={() => setActiveEditTimeIndex(index)}
                 >
@@ -137,7 +137,7 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
 
             <button onClick={handleAddTime} className="w-full min-h-[80px] flex items-center justify-center gap-unit rounded-lg border-4 border-dashed border-primary/50 text-primary hover:bg-primary/5 focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all mt-unit shadow-sm bg-surface-container-lowest">
               <span className="material-symbols-outlined text-[36px]" style={{ fontVariationSettings: "'FILL' 1" }}>add_circle</span>
-              <span className="font-headline-md text-headline-md m-0">+ Add Time</span>
+              <span className="font-headline-md text-headline-md m-0">Add Time</span>
             </button>
           </div>
         </div>
@@ -152,10 +152,10 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
           </button>
         </div>
       </div>
-      
+
       {activeEditTimeIndex !== null && (
-        <TouchTimePicker 
-          initialTime={timeSlots[activeEditTimeIndex]} 
+        <TouchTimePicker
+          initialTime={timeSlots[activeEditTimeIndex]}
           onSave={(newTime) => {
             const newTimes = [...timeSlots];
             newTimes[activeEditTimeIndex] = newTime;
