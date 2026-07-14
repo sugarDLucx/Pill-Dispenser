@@ -11,7 +11,7 @@ cd backend/piper
 
 # Download Piper binary for aarch64
 echo "Downloading Piper..."
-wget -qO piper.tar.gz https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_linux_aarch64.tar.gz
+wget -qO piper.tar.gz https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_aarch64.tar.gz
 
 # Extract
 echo "Extracting Piper..."
