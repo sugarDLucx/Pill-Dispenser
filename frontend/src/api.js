@@ -1,6 +1,8 @@
+const API_BASE = `http://${window.location.hostname}:8000`;
+
 export const fetchStatus = async () => {
   try {
-    const res = await fetch("http://localhost:8000/api/status");
+    const res = await fetch(`${API_BASE}/api/status`);
     return await res.json();
   } catch (e) {
     console.error("Failed to fetch status", e);
@@ -10,7 +12,7 @@ export const fetchStatus = async () => {
 
 export const fetchSchedules = async () => {
   try {
-    const res = await fetch("http://localhost:8000/api/schedule");
+    const res = await fetch(`${API_BASE}/api/schedule`);
     return await res.json();
   } catch (e) {
     console.error("Failed to fetch schedules", e);
@@ -20,7 +22,7 @@ export const fetchSchedules = async () => {
 
 export const markMedicineTaken = async () => {
   try {
-    const res = await fetch("http://localhost:8000/api/medicine-taken", {
+    const res = await fetch(`${API_BASE}/api/medicine-taken`, {
       method: "POST"
     });
     return await res.json();
@@ -32,7 +34,7 @@ export const markMedicineTaken = async () => {
 
 export const updateSchedule = async (data) => {
   try {
-    const res = await fetch("http://localhost:8000/api/schedule", {
+    const res = await fetch(`${API_BASE}/api/schedule`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
