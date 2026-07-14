@@ -1,10 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { updateSchedule } from '../api';
+import TouchTimePicker from './TouchTimePicker';
+
+const formatTime12hr = (timeStr) => {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':');
+  let hour = parseInt(h, 10);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  hour = hour % 12;
+  hour = hour || 12; // 0 becomes 12
+  return `${hour}:${m} ${ampm}`;
+};
 
 const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
   const [medicineName, setMedicineName] = useState('');
   const [frequency, setFrequency] = useState('daily');
-  const [timeSlots, setTimeSlots] = useState([]);
+  const [timeSlots, setTimeSlots] = useState(['08:00']);
+  const [activeEditTimeIndex, setActiveEditTimeIndex] = useState(null);
 
   useEffect(() => {
     if (initialData) {
@@ -12,6 +24,8 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
       setFrequency(initialData.frequency || 'daily');
       if (initialData.time_slots) {
         setTimeSlots(initialData.time_slots.split(','));
+      } else {
+        setTimeSlots(['08:00']);
       }
     }
   }, [slotId]); // Only reset when slotId changes, ignore background polling updates
@@ -22,6 +36,7 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
   };
 
   const handleRemoveTime = (index) => {
+    if (timeSlots.length <= 1) return; // Prevent removing the last time
     const newTimes = [...timeSlots];
     newTimes.splice(index, 1);
     setTimeSlots(newTimes);
@@ -103,24 +118,20 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
             <label className="font-label-lg text-label-lg text-on-surface">Scheduled Times</label>
             
             {timeSlots.map((time, index) => (
-              <div key={index} className="bg-surface flex items-center justify-between p-4 rounded-lg border-2 border-surface-variant mt-2">
-                <div className="flex items-center gap-unit">
-                  <span className="material-symbols-outlined text-[32px] text-secondary">schedule</span>
-                  {/* Using a time input for editing */}
-                  <input 
-                    type="time" 
-                    value={time} 
-                    onChange={(e) => {
-                      const newTimes = [...timeSlots];
-                      newTimes[index] = e.target.value;
-                      setTimeSlots(newTimes);
-                    }}
-                    className="font-headline-md text-headline-md text-on-surface bg-transparent border-none focus:ring-0"
-                  />
+              <div key={index} className="bg-surface flex items-center justify-between p-4 rounded-lg border-2 border-surface-variant mt-2 shadow-sm">
+                <div 
+                  className="flex items-center gap-4 cursor-pointer flex-1 py-2 active:scale-95 transition-transform"
+                  onClick={() => setActiveEditTimeIndex(index)}
+                >
+                  <span className="material-symbols-outlined text-[36px] text-secondary">schedule</span>
+                  <div className="font-headline-lg text-4xl text-on-surface tracking-wide">{formatTime12hr(time)}</div>
+                  <span className="material-symbols-outlined text-primary/50 text-[24px] ml-2">edit</span>
                 </div>
-                <button onClick={() => handleRemoveTime(index)} aria-label="Remove time" className="h-[64px] w-[64px] flex items-center justify-center rounded-lg border-2 border-error text-error hover:bg-error-container focus:outline-none focus:ring-4 focus:ring-error/50 transition-colors">
-                  <span className="material-symbols-outlined text-[28px]">delete</span>
-                </button>
+                {timeSlots.length > 1 && (
+                  <button onClick={() => handleRemoveTime(index)} aria-label="Remove time" className="h-[64px] w-[64px] flex items-center justify-center rounded-lg border-2 border-error text-error hover:bg-error-container focus:outline-none focus:ring-4 focus:ring-error/50 transition-colors ml-4">
+                    <span className="material-symbols-outlined text-[32px]">delete</span>
+                  </button>
+                )}
               </div>
             ))}
 
@@ -141,6 +152,19 @@ const ScheduleModal = ({ slotId, initialData, onClose, onSave }) => {
           </button>
         </div>
       </div>
+      
+      {activeEditTimeIndex !== null && (
+        <TouchTimePicker 
+          initialTime={timeSlots[activeEditTimeIndex]} 
+          onSave={(newTime) => {
+            const newTimes = [...timeSlots];
+            newTimes[activeEditTimeIndex] = newTime;
+            setTimeSlots(newTimes);
+            setActiveEditTimeIndex(null);
+          }}
+          onClose={() => setActiveEditTimeIndex(null)}
+        />
+      )}
     </>
   );
 };
