@@ -83,11 +83,31 @@ def get_status(db: Session = Depends(get_db)):
     schedules = db.query(MedicationSchedule).all()
     next_dose_time = "None"
     next_dose_med = "None"
-    # A real implementation would parse times and find the closest future time
-    # For simplicity, returning a placeholder or basic logic
-    if schedules:
-        next_dose_time = schedules[0].time_slots.split(",")[0]
-        next_dose_med = schedules[0].medicine_name
+    from datetime import datetime
+    now = datetime.now()
+    current_time_str = now.strftime("%H:%M")
+    
+    closest_time = None
+    closest_med = None
+    
+    for schedule in schedules:
+        if not schedule.time_slots: continue
+        slots = schedule.time_slots.split(",")
+        for slot in slots:
+            slot = slot.strip()
+            if slot > current_time_str:
+                if closest_time is None or slot < closest_time:
+                    closest_time = slot
+                    closest_med = schedule.medicine_name
+                    
+    if closest_time:
+        h, m = closest_time.split(":")
+        hour = int(h)
+        ampm = "PM" if hour >= 12 else "AM"
+        hour = hour % 12
+        hour = hour if hour else 12
+        next_dose_time = f"{hour}:{m} {ampm}"
+        next_dose_med = closest_med
 
     return {
         "temperature": current_temperature,
