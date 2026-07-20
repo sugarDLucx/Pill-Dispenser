@@ -63,7 +63,12 @@ You will need a robust **5V 10A Power Supply** to power the entire system.
 
 ## 4. Frontend Setup (React/Vite)
 
-1. **Install Node.js** (if not already installed).
+1. **Install Node.js 20.x**:
+   ```bash
+   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   sudo apt-get install -y nodejs
+   ```
+   *(Verify installation by running `node -v` and `npm -v`)*
 2. **Install frontend dependencies**:
    ```bash
    cd ~/Pill-Dispenser/frontend
