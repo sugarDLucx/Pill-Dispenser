@@ -41,9 +41,9 @@ from backend.models import MedicationSchedule, SystemSettings
 from backend.audio_engine import play_announcement
 
 # --- Hardware Setup ---
-# Changed from 17 and 27 to prevent conflicts with the 3.5" SPI touchscreen
-BUTTON_PIN = 23 # Changed from 17 (which is Touch PENIRQ)
-RELAY_PIN = 24  # Changed from 27 (which is LCD Reset)
+# Pins are placeholders
+BUTTON_PIN = 17
+RELAY_PIN = 27
 DHT_PIN = 4 # board.D4 if using board
 SIM_UART_PORT = "/dev/ttyS0"
 SIM_BAUDRATE = 9600

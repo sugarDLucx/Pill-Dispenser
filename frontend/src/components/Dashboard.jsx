@@ -46,19 +46,19 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex-grow flex flex-col md:flex-row px-margin-page py-gutter gap-margin-page overflow-hidden">
+    <div className="flex-grow flex flex-row p-2 gap-2 overflow-hidden">
       
       {/* Left Pane (60%): Interactive Dispenser View */}
-      <section className="w-full md:w-[60%] flex flex-col items-center justify-center bg-surface-container-lowest rounded-xl border-2 border-surface-variant relative shadow-lg p-8">
+      <section className="w-[60%] h-full flex flex-col items-center justify-center bg-surface-container-lowest rounded-xl border-2 border-surface-variant relative shadow-sm p-2">
         
         {/* Legend Button */}
-        <div className="absolute top-4 left-4 z-10">
+        <div className="absolute top-2 left-2 z-10">
           <button 
             onClick={() => setShowLegend(!showLegend)}
-            className="flex items-center gap-2 bg-surface-container px-4 py-2 rounded-full border-2 border-surface-variant hover:bg-surface-variant transition-colors"
+            className="flex items-center gap-1 bg-surface-container px-2 py-1 rounded-full border border-surface-variant hover:bg-surface-variant transition-colors"
           >
-            <span className="material-symbols-outlined text-[24px] text-on-surface-variant">help</span>
-            <span className="font-label-lg text-on-surface">Legend</span>
+            <span className="material-symbols-outlined text-[18px] text-on-surface-variant">help</span>
+            <span className="text-xs text-on-surface">Legend</span>
           </button>
           
           {/* Legend Tooltip */}
@@ -80,25 +80,21 @@ const Dashboard = () => {
           )}
         </div>
 
-        <Decagon schedules={schedules} activeSlot={activeSlot} onSlotClick={handleSlotClick} />
-        
-        <div className="mt-12 text-center">
-          <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">Dispenser Ready</h2>
-          <p className="font-body-lg text-body-lg text-on-surface-variant">Please take the medication from the highlighted yellow slot when active.</p>
+        <div className="flex-grow flex items-center justify-center w-full max-h-[85%]">
+          <Decagon schedules={schedules} activeSlot={activeSlot} onSlotClick={handleSlotClick} />
         </div>
       </section>
 
       {/* Right Pane (40%): Action Area */}
-      <section className="w-full md:w-[40%] flex flex-col gap-margin-page">
+      <section className="w-[40%] h-full flex flex-col gap-2">
         
         {/* Next Dose Info Panel */}
-        <div className="bg-surface-container-lowest rounded-xl border-2 border-surface-variant p-8 flex flex-col items-center justify-center text-center shadow-lg">
-          <span className="material-symbols-outlined text-primary text-[64px] mb-4">info</span>
-          <h2 className="font-display-lg text-display-lg text-on-background mb-4">Next Dose:</h2>
-          <div className="font-display-lg text-display-lg text-primary font-bold mb-4">
+        <div className="bg-surface-container-lowest rounded-xl border-2 border-surface-variant p-2 flex flex-col items-center justify-center text-center shadow-sm flex-[1]">
+          <h2 className="text-sm font-bold text-on-background mb-1">Next Dose:</h2>
+          <div className="text-xl text-primary font-bold mb-1 line-clamp-1">
             {status?.next_dose_time || "None"}
           </div>
-          <div className="font-headline-lg text-headline-lg text-on-surface-variant bg-surface-container px-6 py-4 rounded-lg inline-block">
+          <div className="text-xs text-on-surface-variant bg-surface-container px-2 py-1 rounded inline-block line-clamp-2">
             {status?.next_dose_med || "No medication scheduled"}
           </div>
         </div>
@@ -106,17 +102,17 @@ const Dashboard = () => {
         {/* Primary Action Button */}
         <button 
           onClick={handleMedicineTaken}
-          className="w-full h-auto min-h-[140px] bg-primary-container text-on-primary-container rounded-xl flex flex-col items-center justify-center shadow-lg transition-all active:bg-primary hover:brightness-105 group border-2 border-primary"
+          className="w-full bg-primary-container text-on-primary-container rounded-xl flex flex-col items-center justify-center shadow-sm active:bg-primary transition-all p-2 flex-[1] group border-2 border-primary"
         >
-          <span className="material-symbols-outlined text-[64px] mb-2 group-active:scale-90 transition-transform">check_circle</span>
-          <span className="font-display-lg text-display-lg font-bold">MEDICINE TAKEN</span>
+          <span className="material-symbols-outlined text-[40px] mb-1 group-active:scale-90 transition-transform">check_circle</span>
+          <span className="text-sm font-bold">MEDICINE TAKEN</span>
         </button>
         
         {/* Secondary Action/Status */}
-        <div className="flex-grow flex items-end justify-center pb-4">
-          <div className="flex items-center gap-4 bg-surface-container-low px-6 py-4 rounded-full border-2 border-surface-variant shadow-sm">
-            <span className="material-symbols-outlined text-on-surface-variant text-[32px]">schedule</span>
-            <span className="font-body-lg text-body-lg text-on-surface-variant">System Active</span>
+        <div className="flex items-center justify-center h-8">
+          <div className="flex items-center gap-2 bg-surface-container-low px-3 py-1 rounded-full border border-surface-variant shadow-sm">
+            <span className="material-symbols-outlined text-on-surface-variant text-[16px]">schedule</span>
+            <span className="text-xs text-on-surface-variant">System Active</span>
           </div>
         </div>
 

@@ -8,8 +8,8 @@ You will need a robust **5V 10A Power Supply** to power the entire system.
 **Important**: Power the SIM module, cooling relay, and PCA9685 directly from the power supply, NOT through the Raspberry Pi's 5V pins to prevent brownouts.
 
 ### Pin Connections (Raspberry Pi Header)
-*   **GPIO 23**: Medicine Taken Button (Input) - *Must not be 17, as the touchscreen uses 17 for touch interrupts!*
-*   **GPIO 24**: Cooling Fan / Peltier Relay (Output) - *Must not be 27, as the touchscreen uses 27 for screen reset!*
+*   **GPIO 17**: Medicine Taken Button (Input)
+*   **GPIO 27**: Cooling Fan / Peltier Relay (Output)
 *   **GPIO 4**: DHT11 Temperature Sensor (Data pin)
 *   **GPIO 2 (SDA) & GPIO 3 (SCL)**: I2C connections for the PCA9685 Servo Controller.
 *   **GPIO 14 (TXD) & GPIO 15 (RXD)**: UART connections for the GSM/SIM Module.
@@ -47,7 +47,7 @@ You will need a robust **5V 10A Power Supply** to power the entire system.
 3. **Install the Audio Engine (Piper TTS)**:
    We use Piper for offline Text-to-Speech. Run the provided setup script:
    ```bash
-   cd ~/Pill-Dispenser
+   cd ~/Pill-Dispenser/backend
    chmod +x setup_piper.sh
    ./setup_piper.sh
    ```
@@ -63,9 +63,9 @@ You will need a robust **5V 10A Power Supply** to power the entire system.
 
 ## 4. Frontend Setup (React/Vite)
 
-1. **Install Node.js 18.x** (Version 20 doesn't support 32-bit OS):
+1. **Install Node.js 20.x**:
    ```bash
-   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
    sudo apt-get install -y nodejs
    ```
    *(Verify installation by running `node -v` and `npm -v`)*
