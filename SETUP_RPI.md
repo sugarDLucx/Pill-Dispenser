@@ -47,7 +47,7 @@ You will need a robust **5V 10A Power Supply** to power the entire system.
 3. **Install the Audio Engine (Piper TTS)**:
    We use Piper for offline Text-to-Speech. Run the provided setup script:
    ```bash
-   cd ~/Pill-Dispenser/backend
+   cd ~/Pill-Dispenser
    chmod +x setup_piper.sh
    ./setup_piper.sh
    ```
@@ -63,9 +63,9 @@ You will need a robust **5V 10A Power Supply** to power the entire system.
 
 ## 4. Frontend Setup (React/Vite)
 
-1. **Install Node.js 20.x**:
+1. **Install Node.js 18.x** (Version 20 doesn't support 32-bit OS):
    ```bash
-   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
    sudo apt-get install -y nodejs
    ```
    *(Verify installation by running `node -v` and `npm -v`)*
