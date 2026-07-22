@@ -58,6 +58,17 @@ RASPBERRY PI GPIO PINOUT
    - Function: Plays TTS alerts and sounds.
    - Audio Jack: Connect a standard 3.5mm speaker or amplifier to the Raspberry Pi's built-in audio jack. Alternatively, use a USB sound card. 
 
-7. DISPLAY
-   - If using a 3.5inch TFT Display (SPI), it usually mounts directly onto the first 26 pins of the Raspberry Pi header. 
-   - Note: The display uses SPI (GPIO 10, 9, 11, 8) and specific touch pins. Ensure they do not conflict with the pins listed above. If you use a physical button (GPIO 17) instead of touch, the display will only be used for visual output.
+7. 3.5-INCH TFT DISPLAY (SPI) OVERLAP WARNING
+   - The 3.5-inch 480x320 display is designed as a "HAT" that plugs directly into Pins 1-26 of the Raspberry Pi.
+   - PROBLEM: If you plug the screen directly into the Pi, it physically blocks access to the I2C (Pins 3/5), UART (Pins 8/10), and GPIO pins you need for the other components!
+   - SOLUTION 1 (Recommended): Use a "GPIO Expansion Board" or "Stackable Header" or "T-Cobbler". This allows you to plug the screen in on top, but gives you duplicate pins on the side to connect the SIM800L, PCA9685, DHT11, and Button.
+   - SOLUTION 2 (Manual Wiring): Do not plug the screen directly onto the Pi. Instead, use jumper wires to connect only the required screen pins:
+      * 5V (Pin 2) -> Screen VCC
+      * GND (Pin 6) -> Screen GND
+      * GPIO 11 (Pin 23) -> Screen SCLK (SPI Clock)
+      * GPIO 9 (Pin 21) -> Screen MISO
+      * GPIO 10 (Pin 19) -> Screen MOSI
+      * GPIO 8 (Pin 24) -> Screen CE0 (Chip Select)
+      * GPIO 25 (Pin 22) -> Screen Reset
+      * GPIO 24 (Pin 18) -> Screen RS/DC
+   - Note: Since you opted to use a physical button (GPIO 17) for dispensing instead of the broken touch controller on the Trixie OS, you do not need to wire the SPI Touch interrupt pins.
