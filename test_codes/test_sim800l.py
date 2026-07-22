@@ -30,6 +30,12 @@ def test_sim800l():
                             print(f"\n[SUCCESS] SIM800L responded on {port} at {baud} baud!")
                             print(f"[REPLY]: {response}")
                             
+                            # Enable extended verbose error messages
+                            ser.write(b'AT+CMEE=2\r\n')
+                            time.sleep(0.5)
+                            if ser.in_waiting:
+                                ser.read(ser.in_waiting) # clear buffer
+                            
                             # Try to get more info
                             print("\n[*] Checking SIM Status...")
                             ser.write(b'AT+CPIN?\r\n')
