@@ -111,8 +111,8 @@ const Dashboard = () => {
         {schedules.map(sch => (
             <div key={sch.compartment_id} className="bg-surface-container p-3 rounded-lg border-2 border-surface-variant flex justify-between items-center cursor-pointer hover:bg-surface-variant transition-colors" onClick={() => handleSlotClick(sch.compartment_id)}>
               <div className="flex flex-col">
-                  <span className="font-bold text-lg text-on-surface">Slot {sch.compartment_id}: {sch.medicine_name}</span>
-                  <span className="text-sm text-on-surface-variant font-medium">{sch.frequency.replace('_', ' ')}</span>
+                  <span className="font-bold text-lg text-on-surface">Slot {sch.compartment_id}: {sch.medicine_name.toUpperCase()}</span>
+                  <span className="text-sm text-on-surface-variant font-medium">{sch.frequency.replace('_', ' ').toUpperCase()}</span>
               </div>
               <div className="flex flex-col items-end">
                   {sch.time_slots.split(',').map((t, idx) => (
@@ -129,7 +129,7 @@ const Dashboard = () => {
             {status?.next_dose_time || "None"}
           </div>
           <div className="text-lg font-bold text-on-surface-variant bg-surface-container px-4 py-2 rounded-lg">
-            {status?.next_dose_med || "No medication"}
+            {status?.next_dose_med?.toUpperCase() || "NO MEDICATION"}
           </div>
         </div>
         <div className="flex items-center justify-center bg-surface-container-low p-4 rounded-xl border-2 border-surface-variant shadow-sm">
