@@ -60,6 +60,16 @@ const Dashboard = () => {
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  const formatTime12Hour = (timeStr) => {
+    if (!timeStr) return "";
+    const [h, m] = timeStr.split(':');
+    let hour = parseInt(h, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12;
+    hour = hour ? hour : 12;
+    return `${hour}:${m} ${ampm}`;
+  };
+
   const isDispensing = status?.is_dispense_window_active;
   const activeSlot = isDispensing ? status?.active_compartment_id : null;
 
@@ -106,7 +116,7 @@ const Dashboard = () => {
               </div>
               <div className="flex flex-col items-end">
                   {sch.time_slots.split(',').map((t, idx) => (
-                    <span key={idx} className="text-sm font-mono font-bold text-primary">{t}</span>
+                    <span key={idx} className="text-sm font-mono font-bold text-primary">{formatTime12Hour(t)}</span>
                   ))}
               </div>
             </div>
