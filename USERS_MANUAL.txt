@@ -43,7 +43,7 @@ Device Behavior & Time-Locked Dispensing
 ----------------------------------------
 - When a scheduled time arrives, the device unlocks the dispensing window for exactly 5 minutes.
 - The screen will display a 5-minute countdown and the specific compartment will be highlighted on the screen.
-- The device will announce: "It is time to take your medication. Please press the green button to dispense your pills."
+- The device will announce: "It is time to take your medication. Please press the button to dispense your pills."
 - The patient MUST press the physical button on the device during this 5-minute window to dispense the pills.
 - Once pressed, the pills will drop, and the device will announce: "Medication dispensed. Please take your pills now." followed shortly by "I hope you're satisfied with my care."
 - If the button is NOT pressed within 5 minutes, the device locks again. It will announce a missed alert, and an SMS text will be immediately dispatched to all registered caretakers and the patient stating: "ALERT: Patient missed scheduled medication." along with the medicine details.
