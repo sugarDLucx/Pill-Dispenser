@@ -24,9 +24,6 @@ function App() {
         </div>
         <div className="flex items-center gap-gutter text-on-surface-variant">
           <div className="flex flex-col items-center hover:bg-surface-container-high p-2 rounded-lg cursor-pointer active:scale-95 transition-transform duration-150">
-            <span className="material-symbols-outlined text-[40px]">wifi</span>
-          </div>
-          <div className="flex flex-col items-center hover:bg-surface-container-high p-2 rounded-lg cursor-pointer active:scale-95 transition-transform duration-150">
             <span className="material-symbols-outlined text-[40px]">bluetooth</span>
           </div>
           <div className="flex items-center gap-2 font-headline-md text-headline-md hover:bg-surface-container-high p-2 rounded-lg cursor-pointer active:scale-95 transition-transform duration-150">
