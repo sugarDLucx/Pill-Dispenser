@@ -9,6 +9,7 @@ import threading
 from backend.database import engine, Base, get_db
 from backend.models import MedicationSchedule, SystemSettings
 from backend.hardware_daemon import mark_medicine_taken, main_loop, current_temperature
+import backend.hardware_daemon as hw
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -124,12 +125,19 @@ def get_status(db: Session = Depends(get_db)):
             next_dose_time += " (Tomorrow)"
         next_dose_med = next_med_val
 
+    dispense_countdown = 0
+    if hw.is_dispense_window_active and hw.dispense_start_time:
+        dispense_countdown = max(0, 300 - int((now - hw.dispense_start_time).total_seconds()))
+
     return {
         "temperature": current_temperature,
         "next_dose_time": next_dose_time,
         "next_dose_med": next_dose_med,
         "network_status": "Connected",
-        "gsm_status": "Active"
+        "gsm_status": "Active",
+        "is_dispense_window_active": hw.is_dispense_window_active,
+        "active_compartment_id": hw.active_compartment_id,
+        "dispense_countdown_seconds": dispense_countdown
     }
 
 @app.post("/api/medicine-taken")

@@ -15,5 +15,5 @@ class SystemSettings(Base):
     __tablename__ = "system_settings"
 
     id = Column(Integer, primary_key=True, index=True)
-    caretaker_primary_mobile = Column(String)
-    caretaker_secondary_mobile = Column(String)
+    user_mobile = Column(String, default="")
+    caretakers = Column(String, default="") # Comma-separated list of phone numbers

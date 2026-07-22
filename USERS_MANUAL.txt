@@ -1,0 +1,53 @@
+SMART PILL DISPENSER - USER'S MANUAL
+====================================
+
+Overview
+--------
+This Smart Pill Dispenser securely stores up to 10 compartments of medication. It is a time-locked system, meaning pills can only be dispensed when the scheduled time arrives. It also includes an integrated climate control system, physical audio alerts, Bluetooth auto-connect support, and an SMS management system.
+
+Setting up Users and Caretakers via SMS
+---------------------------------------
+You can configure the system entirely via SMS to the device's phone number. Each SMS can be a maximum of 160 characters. 
+
+Available Commands:
+1. Set the Primary User:
+   Syntax: user [phone number]
+   Example: user +1234567890
+   Description: Sets the primary patient's phone number. The patient will receive friendly reminders when it is time to take medication. The user can also add, edit, and remove schedules via SMS.
+
+2. Add a Caretaker:
+   Syntax: addcare [phone number]
+   Example: addcare +0987654321
+   Description: Adds a caretaker to the alert list. Caretakers receive alerts if the patient misses their medication after the 5-minute dispense window expires. Caretakers can also edit the medication schedule.
+
+Managing the Medication Schedule via SMS
+----------------------------------------
+You can program the 10 inner compartments using simple SMS commands.
+
+1. Add a Schedule:
+   Syntax: add [Compartment ID 1-10] [Medicine Name] [Frequency] [Time]...
+   Example: add 1 Losartan Daily 08:00,20:00
+   Description: Assigns a medication to a specific compartment slot. You can list multiple times separated by a comma (24-hour format).
+
+2. Edit a Schedule:
+   Syntax: edit [Compartment ID 1-10] [Medicine Name] [Frequency] [Time]...
+   Example: edit 1 Losartan Twice_Daily 08:00,18:00
+   Description: Edits an existing compartment's schedule.
+
+3. Remove a Schedule:
+   Syntax: remove [Medicine Name]
+   Example: remove Losartan
+   Description: Deletes the medication schedule for the specified medicine.
+
+Device Behavior & Time-Locked Dispensing
+----------------------------------------
+- When a scheduled time arrives, the device unlocks the dispensing window for exactly 5 minutes.
+- The screen will display a 5-minute countdown and the specific compartment will be highlighted on the screen.
+- The device will announce: "It is time to take your medication. Please press the green button to dispense your pills."
+- The patient MUST press the physical button on the device during this 5-minute window to dispense the pills.
+- Once pressed, the pills will drop, and the device will announce: "Medication dispensed. Please take your pills now." followed shortly by "I hope you're satisfied with my care."
+- If the button is NOT pressed within 5 minutes, the device locks again. It will announce a missed alert, and an SMS text will be immediately dispatched to all registered caretakers and the patient stating: "ALERT: Patient missed scheduled medication." along with the medicine details.
+
+Bluetooth Audio (Auto-Connect)
+------------------------------
+On startup, the system will automatically search for and connect to trusted Bluetooth speakers. If none are found, it will scan for the nearest open Bluetooth speaker to establish a connection. Note: If an audio jack speaker is plugged in, Bluetooth will not be activated.
