@@ -65,27 +65,28 @@ const Dashboard = () => {
 
   // --- RENDERING VIEWS ---
 
+  // View A: The Decagon & Permanent Legend
   const renderDecagonView = () => (
-    <div className="w-full h-full relative p-2 bg-surface-container-lowest rounded-xl border-2 border-surface-variant shadow-sm flex items-center justify-center">
+    <div className="w-full h-full relative bg-surface-container-lowest flex items-center justify-center p-0 m-0">
       
-      {/* Absolute Small Legend */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 bg-surface-container-highest/90 backdrop-blur rounded-lg p-2 border border-surface-variant shadow-sm">
-        <h3 className="font-bold text-on-surface text-xs text-center border-b border-surface-variant pb-1">Legend</h3>
+      {/* Absolute Legend */}
+      <div className="absolute top-2 left-2 z-10 flex flex-col gap-2 bg-surface-container-highest/90 backdrop-blur rounded-lg p-3 border-2 border-surface-variant shadow-md">
+        <h3 className="font-bold text-on-surface text-sm text-center border-b border-surface-variant pb-1">Legend</h3>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-sm bg-surface-container border border-surface-dim"></div>
-          <span className="font-bold text-on-surface text-[10px]">Empty</span>
+          <div className="w-6 h-6 rounded-md bg-surface-container border-2 border-surface-dim"></div>
+          <span className="font-bold text-on-surface text-sm">Empty</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-sm bg-secondary-fixed border border-secondary-fixed-dim"></div>
-          <span className="font-bold text-on-surface text-[10px]">Scheduled</span>
+          <div className="w-6 h-6 rounded-md bg-secondary-fixed border-2 border-secondary-fixed-dim"></div>
+          <span className="font-bold text-on-surface text-sm">Scheduled</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-sm bg-tertiary-fixed border border-tertiary-fixed-dim"></div>
-          <span className="font-bold text-on-surface text-[10px]">Active</span>
+          <div className="w-6 h-6 rounded-md bg-tertiary-fixed border-2 border-tertiary-fixed-dim"></div>
+          <span className="font-bold text-on-surface text-sm">Active</span>
         </div>
       </div>
 
-      <div className="w-[95%] h-[95%] flex justify-center items-center">
+      <div className="w-full h-full flex justify-center items-center">
         <Decagon schedules={schedules} activeSlot={activeSlot} onSlotClick={handleSlotClick} />
       </div>
     </div>
