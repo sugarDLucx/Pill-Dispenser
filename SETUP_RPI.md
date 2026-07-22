@@ -7,12 +7,7 @@ This guide will walk you through setting up the Smart Pill Dispenser hardware an
 You will need a robust **5V 10A Power Supply** to power the entire system. 
 **Important**: Power the SIM module, cooling relay, and PCA9685 directly from the power supply, NOT through the Raspberry Pi's 5V pins to prevent brownouts.
 
-### Pin Connections (Raspberry Pi Header)
-*   **GPIO 17**: Medicine Taken Button (Input)
-*   **GPIO 27**: Cooling Fan / Peltier Relay (Output)
-*   **GPIO 4**: DHT11 Temperature Sensor (Data pin)
-*   **GPIO 2 (SDA) & GPIO 3 (SCL)**: I2C connections for the PCA9685 Servo Controller.
-*   **GPIO 14 (TXD) & GPIO 15 (RXD)**: UART connections for the GSM/SIM Module.
+For a detailed breakdown of all GPIO pins and connections, please read the `WIRING_PINOUT.txt` file located in the root of this project.
 
 ---
 
@@ -44,14 +39,21 @@ You will need a robust **5V 10A Power Supply** to power the entire system.
    source venv/bin/activate
    pip install -r requirements.txt
    ```
-3. **Install the Audio Engine (Piper TTS)**:
-   We use Piper for offline Text-to-Speech. Run the provided setup script:
+3. **Generate Audio Files**:
+   We use pre-recorded `.mp3` files for audio feedback. Run the provided script to generate the default voice lines using Google TTS:
    ```bash
-   cd ~/Pill-Dispenser/backend
-   chmod +x setup_piper.sh
-   ./setup_piper.sh
+   cd ~/Pill-Dispenser
+   python backend/generate_audio.py
    ```
-4. **Test the Backend**:
+   *(Ensure you have internet access during this step. After this, the system works offline).*
+
+4. **Enable Bluetooth Auto-Connect Daemon**:
+   To automatically connect to your trusted Bluetooth speakers on boot, make the script executable:
+   ```bash
+   chmod +x backend/bt_autoconnect.sh
+   ```
+
+5. **Test the Backend**:
    ```bash
    cd ~/Pill-Dispenser
    source venv/bin/activate
@@ -87,7 +89,7 @@ You will need a robust **5V 10A Power Supply** to power the entire system.
 If your Raspberry Pi has a touchscreen attached, you will want the UI to automatically launch in full-screen mode on boot.
 
 1. **Create a Systemd Service for the Backend**:
-   Create `/etc/systemd/system/pill-backend.service` to auto-start the Python server on boot.
+   Create `/etc/systemd/system/pill-backend.service` to auto-start the Python server on boot. Include a line to execute `bt_autoconnect.sh` before the main application starts.
 2. **Create a Systemd Service for the Frontend**:
    You can either serve the built React app (`npm run build`) via a simple HTTP server or run Vite.
 3. **Launch Chromium in Kiosk Mode**:
@@ -99,7 +101,3 @@ If your Raspberry Pi has a touchscreen attached, you will want the UI to automat
    ```bash
    chromium-browser --kiosk --disable-pinch --overscroll-history-navigation=0 http://localhost:5173
    ```
-
-## 6. Usage Notes
-*   **Time Editor**: The frontend UI features a custom swipe-to-scroll time picker designed perfectly for the Pi's touchscreen.
-*   **Audio Issues**: If no audio plays, verify that your speaker is plugged into the RPi audio jack or USB sound card, and check `alsamixer` to ensure the volume is turned up.
