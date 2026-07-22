@@ -31,6 +31,12 @@ def test_sim800l():
                             print(f"[REPLY]: {response}")
                             
                             # Try to get more info
+                            print("\n[*] Checking SIM Status...")
+                            ser.write(b'AT+CPIN?\r\n')
+                            time.sleep(1)
+                            if ser.in_waiting:
+                                print(f"[REPLY]: {ser.read(ser.in_waiting).decode('ascii', errors='ignore').strip()}")
+
                             print("\n[*] Checking Network Registration...")
                             ser.write(b'AT+CREG?\r\n')
                             time.sleep(1)
