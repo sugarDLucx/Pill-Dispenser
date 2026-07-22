@@ -96,7 +96,7 @@ def send_sms(phone_number: str, message: str):
         print(f"Error sending SMS to {phone_number}: {e}")
 
 def parse_sms_command(sender: str, message: str):
-    message = message.strip().lower()
+    message = message.strip()
     parts = message.split()
     if not parts:
         return
@@ -111,7 +111,7 @@ def parse_sms_command(sender: str, message: str):
     # Basic authorization: If user or caretakers exist, require sender to be one. 
     # For initial setup, we might allow it, but we assume the user can always set.
     
-    cmd = parts[0]
+    cmd = parts[0].lower()
     try:
         if cmd == "user" and len(parts) >= 2:
             settings.user_mobile = parts[1]
