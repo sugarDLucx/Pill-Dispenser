@@ -26,12 +26,12 @@ You can program the 10 inner compartments using simple SMS commands.
 
 1. Add a Schedule:
    Syntax: add [Compartment ID 1-10] [Medicine Name] [Frequency] [Time]...
-   Example: add 1 Losartan Daily 08:00,20:00
-   Description: Assigns a medication to a specific compartment slot. You can list multiple times separated by a comma (24-hour format).
+   Example: add 1 Losartan Daily 08:00AM, 08:00PM
+   Description: Assigns a medication to a specific compartment slot. You can list multiple times separated by a comma. Both 12-hour (e.g. 08:00AM) and 24-hour (e.g. 20:00) formats are supported.
 
 2. Edit a Schedule:
    Syntax: edit [Compartment ID 1-10] [Medicine Name] [Frequency] [Time]...
-   Example: edit 1 Losartan Twice_Daily 08:00,18:00
+   Example: edit 1 Losartan Twice_Daily 08:00AM, 06:00PM
    Description: Edits an existing compartment's schedule.
 
 3. Remove a Schedule:

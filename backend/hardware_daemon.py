@@ -128,7 +128,19 @@ def parse_sms_command(sender: str, message: str):
             comp_id = int(parts[1])
             med_name = parts[2]
             freq = parts[3]
-            times = ",".join(parts[4:])
+            raw_times = " ".join(parts[4:]).upper()
+            raw_times = raw_times.replace(" AM", "AM").replace(" PM", "PM")
+            time_list = [t.strip() for t in raw_times.split(",") if t.strip()]
+            parsed_times = []
+            for t in time_list:
+                try:
+                    if "AM" in t or "PM" in t:
+                        parsed_times.append(datetime.strptime(t, "%I:%M%p").strftime("%H:%M"))
+                    else:
+                        parsed_times.append(datetime.strptime(t, "%H:%M").strftime("%H:%M"))
+                except ValueError:
+                    parsed_times.append(t)
+            times = ",".join(parsed_times)
             
             sch = db.query(MedicationSchedule).filter(MedicationSchedule.compartment_id == comp_id).first()
             if not sch:
@@ -148,7 +160,19 @@ def parse_sms_command(sender: str, message: str):
             if sch:
                 sch.medicine_name = parts[2]
                 sch.frequency = parts[3]
-                sch.time_slots = ",".join(parts[4:])
+                raw_times = " ".join(parts[4:]).upper()
+                raw_times = raw_times.replace(" AM", "AM").replace(" PM", "PM")
+                time_list = [t.strip() for t in raw_times.split(",") if t.strip()]
+                parsed_times = []
+                for t in time_list:
+                    try:
+                        if "AM" in t or "PM" in t:
+                            parsed_times.append(datetime.strptime(t, "%I:%M%p").strftime("%H:%M"))
+                        else:
+                            parsed_times.append(datetime.strptime(t, "%H:%M").strftime("%H:%M"))
+                    except ValueError:
+                        parsed_times.append(t)
+                sch.time_slots = ",".join(parsed_times)
                 db.commit()
                 print(f"Schedule edited for comp {comp_id}")
         elif cmd == "remove" and len(parts) >= 2:

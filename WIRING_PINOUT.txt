@@ -1,0 +1,63 @@
+SMART PILL DISPENSER - WIRING & PINOUT GUIDE
+============================================
+
+This document details the exact hardware connections required to assemble the Smart Pill Dispenser using a Raspberry Pi 4 Model B.
+
+IMPORTANT POWER GUIDELINES
+--------------------------
+Do NOT draw power for the Servos, SIM800L module, or the Cooling Relay directly from the Raspberry Pi's 5V pins! These components draw significant current spikes that will cause the Raspberry Pi to brownout, crash, or reboot. 
+
+You must use a dedicated, high-current 5V Power Supply (e.g., 5V 10A). 
+Split the 5V and GND outputs from the power supply into a common power rail. Connect the power rail directly to:
+1. The Raspberry Pi 4 (via GPIO 5V/GND or a USB-C breakout).
+2. The SIM800L module VCC/GND.
+3. The PCA9685 Servo Controller terminal block VCC/GND.
+4. The Cooling Relay VCC/GND.
+
+Ensure all components share a COMMON GROUND.
+
+RASPBERRY PI GPIO PINOUT
+------------------------
+
+1. MEDICINE TAKEN BUTTON
+   - Function: Physical button to dispense pills and silence alarms.
+   - GPIO Pin: GPIO 17 (Pin 11)
+   - Connection: Connect one leg of the button to GPIO 17, and the other leg to GND (Pin 9 or 14).
+
+2. DHT11 TEMPERATURE SENSOR
+   - Function: Monitors internal temperature for climate control.
+   - GPIO Pin: GPIO 4 (Pin 7)
+   - VCC: 3.3V (Pin 1) or 5V (Pin 2) depending on your DHT module.
+   - GND: GND (Pin 6)
+   - Data: Connect to GPIO 4. (If using a bare sensor, add a 4.7k-10k pull-up resistor between VCC and Data).
+
+3. COOLING RELAY (FAN / PELTIER)
+   - Function: Activates cooling when temp > 25°C.
+   - GPIO Pin: GPIO 27 (Pin 13)
+   - VCC: 5V (From Power Rail)
+   - GND: GND (From Power Rail)
+   - IN (Signal): Connect to GPIO 27.
+
+4. PCA9685 SERVO CONTROLLER (I2C)
+   - Function: Controls the 10 compartment servos.
+   - SDA: GPIO 2 (Pin 3)
+   - SCL: GPIO 3 (Pin 5)
+   - VCC (Logic): 3.3V (Pin 1)
+   - V+ (Motor Power): 5V (From Power Rail directly into the green terminal block!)
+   - GND: GND (Pin 9)
+   - Notes: Connect the 10 servos to Channels 0 through 9 on the PCA9685.
+
+5. SIM800L GSM MODULE (UART)
+   - Function: Sends SMS alerts and receives SMS commands.
+   - TXD: GPIO 15 / RXD (Pin 10)  -> (Connect Pi RXD to SIM TXD)
+   - RXD: GPIO 14 / TXD (Pin 8)   -> (Connect Pi TXD to SIM RXD)
+   - VCC: 5V (From Power Rail) *Note: Some SIM800L modules require 3.7V - 4.2V. If yours specifically requires this, you must use a buck converter. If it's on a breakout board (like the red EVB boards), it usually accepts 5V.*
+   - GND: GND (From Power Rail)
+
+6. AUDIO
+   - Function: Plays TTS alerts and sounds.
+   - Audio Jack: Connect a standard 3.5mm speaker or amplifier to the Raspberry Pi's built-in audio jack. Alternatively, use a USB sound card. 
+
+7. DISPLAY
+   - If using a 3.5inch TFT Display (SPI), it usually mounts directly onto the first 26 pins of the Raspberry Pi header. 
+   - Note: The display uses SPI (GPIO 10, 9, 11, 8) and specific touch pins. Ensure they do not conflict with the pins listed above. If you use a physical button (GPIO 17) instead of touch, the display will only be used for visual output.
