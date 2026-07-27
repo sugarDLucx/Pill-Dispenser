@@ -55,6 +55,13 @@ def test_sim800l():
                             if ser.in_waiting:
                                 print(f"[REPLY]: {ser.read(ser.in_waiting).decode('ascii', errors='ignore').strip()}")
                             
+                            print("\n[*] Scanning for Available 2G Networks (This can take up to 60 seconds)...")
+                            # Set a longer timeout temporarily just for this command
+                            ser.timeout = 65 
+                            ser.write(b'AT+COPS=?\r\n')
+                            response = ser.read_until(b'OK\r\n')
+                            print(f"[REPLY]:\n{response.decode('ascii', errors='ignore').strip()}")
+                            
                             ser.close()
                             return
                 
