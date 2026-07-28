@@ -35,4 +35,4 @@ def play_audio(filename: str):
 
 if __name__ == "__main__":
     ensure_audio_dir()
-    play_audio("scheduled_time.mp3")
+    play_audio("scheduled_time.wav")

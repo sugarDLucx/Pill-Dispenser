@@ -242,7 +242,7 @@ def mark_medicine_taken():
         return
 
     print("Dispensing pills...")
-    play_audio("dispensing.mp3")
+    play_audio("dispensing.wav")
     
     # Rotate servo
     try:
@@ -260,9 +260,9 @@ def mark_medicine_taken():
     active_compartment_id = None
     dispense_start_time = None
     
-    play_audio("done_dispensing.mp3")
+    play_audio("done_dispensing.wav")
     time.sleep(3)
-    play_audio("satisfied.mp3")
+    play_audio("satisfied.wav")
 
 def handle_missed_medication(schedule):
     global is_dispense_window_active, active_compartment_id, dispense_start_time
@@ -270,7 +270,7 @@ def handle_missed_medication(schedule):
     active_compartment_id = None
     dispense_start_time = None
 
-    play_audio("missed_alert.mp3")
+    play_audio("missed_alert.wav")
 
     db = SessionLocal()
     settings = db.query(SystemSettings).first()
@@ -341,7 +341,7 @@ def main_loop():
                     dispense_start_time = now
                     last_dispensed_minute = current_time_str
                     
-                    play_audio("scheduled_time.mp3")
+                    play_audio("scheduled_time.wav")
                     
                     # Notify user
                     settings = db.query(SystemSettings).first()
