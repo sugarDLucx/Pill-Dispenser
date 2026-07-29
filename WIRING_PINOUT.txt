@@ -12,9 +12,15 @@ Split the 5V and GND outputs from the power supply into a common power rail. Con
 1. The Raspberry Pi 4 (via GPIO 5V/GND or a USB-C breakout).
 2. The SIM800L module VCC/GND.
 3. The PCA9685 Servo Controller terminal block VCC/GND.
-4. The Cooling Relay VCC/GND.
+4. The Cooling Relay VCC/GND (This powers the blue box/coil, NOT the cooler itself).
 
-Ensure all components share a COMMON GROUND.
+12V POWER SUPPLY (For Cooling)
+------------------------------
+Because standard Peltier modules (TEC1-12706) and fans require 12V and draw ~6 Amps, you CANNOT run them off the 5V power supply. You must use a separate 12V Power Supply (e.g., 12V 10A).
+1. Connect the 12V positive wire into the Relay's COM (Common) terminal.
+2. Connect the 12V negative (GND) wire directly to the Fan and Peltier negative wires.
+
+Ensure ALL components and BOTH power supplies (5V and 12V) share a COMMON GROUND.
 
 RASPBERRY PI GPIO PINOUT
 ------------------------
@@ -34,9 +40,14 @@ RASPBERRY PI GPIO PINOUT
 3. COOLING RELAY (FAN / PELTIER)
    - Function: Activates cooling when temp > 25°C.
    - GPIO Pin: GPIO 27 (Pin 13)
-   - VCC: 5V (From Power Rail)
-   - GND: GND (From Power Rail)
-   - IN (Signal): Connect to GPIO 27.
+   - CONTROL WIRING (To Pi):
+     * VCC: 5V (From 5V Power Rail)
+     * GND: GND (From Common Ground)
+     * IN (Signal): Connect to GPIO 27.
+   - LOAD WIRING (To Cooler):
+     * COM Terminal: 12V Positive (From 12V Power Supply)
+     * NO Terminal: Connect to the Positive (Red) wires of both the Fan and Peltier.
+     * GND: Connect the Negative (Black) wires of the Fan and Peltier directly to the 12V Power Supply Ground.
 
 4. PCA9685 SERVO CONTROLLER (I2C)
    - Function: Controls the 10 compartment servos.
