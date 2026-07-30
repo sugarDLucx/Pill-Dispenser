@@ -1,4 +1,5 @@
 import os
+os.environ["SDL_AUDIODRIVER"] = "pulse"  # Force Pygame to use PulseAudio/Pipewire instead of raw ALSA
 import pygame
 import time
 
