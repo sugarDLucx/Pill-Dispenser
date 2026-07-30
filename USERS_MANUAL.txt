@@ -39,6 +39,11 @@ You can program the 10 inner compartments using simple SMS commands.
    Example: remove Losartan
    Description: Deletes the medication schedule for the specified medicine.
 
+4. Force Stop Cooling System:
+   Syntax: cool [off/auto]
+   Example: cool off
+   Description: "cool off" forces the cooling fan and peltier to shut down regardless of temperature. "cool auto" returns it to automatic temperature monitoring.
+
 Device Behavior & Time-Locked Dispensing
 ----------------------------------------
 - When a scheduled time arrives, the device unlocks the dispensing window for exactly 5 minutes.

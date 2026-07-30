@@ -79,6 +79,7 @@ is_dispense_window_active = False
 active_compartment_id = None
 dispense_start_time = None
 current_temperature = 0
+force_cooling_off = False
 
 def send_sms(phone_number: str, message: str):
     if not phone_number:
@@ -185,6 +186,16 @@ def parse_sms_command(sender: str, message: str):
                 db.delete(s)
             db.commit()
             print(f"Removed schedules for {med_name}")
+        elif cmd == "cool" and len(parts) >= 2:
+            global force_cooling_off
+            subcmd = parts[1].lower()
+            if subcmd == "off":
+                force_cooling_off = True
+                if cooling_relay: cooling_relay.off()
+                print("Cooling forced OFF via SMS")
+            elif subcmd == "auto":
+                force_cooling_off = False
+                print("Cooling set to AUTO via SMS")
     except Exception as e:
         print(f"Error parsing SMS command '{message}': {e}")
     finally:
@@ -222,14 +233,14 @@ def sms_monitoring_loop():
         time.sleep(10)
 
 def temp_monitoring_loop():
-    global current_temperature
+    global current_temperature, force_cooling_off
     while True:
         try:
             if hasattr(dht_device, 'temperature'):
                 temp = dht_device.temperature
                 if temp is not None:
                     current_temperature = temp
-                    if temp > 25:
+                    if temp > 25 and not force_cooling_off:
                         if cooling_relay: cooling_relay.on()
                     else:
                         if cooling_relay: cooling_relay.off()
@@ -252,7 +263,7 @@ def mark_medicine_taken():
         if active_compartment_id:
             s = servos.get(active_compartment_id)
             if s:
-                s.angle = 90
+                s.angle = 32
                 time.sleep(1)
                 s.angle = 0
     except Exception as e:
