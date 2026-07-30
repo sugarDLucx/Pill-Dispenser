@@ -41,7 +41,7 @@ from backend.models import MedicationSchedule, SystemSettings
 from backend.audio_engine import play_audio
 
 # --- Hardware Setup ---
-BUTTON_PIN = 17
+BUTTON_PIN = 21
 RELAY_PIN = 27
 DHT_PIN = 4
 SIM_UART_PORT = "/dev/ttyS0"

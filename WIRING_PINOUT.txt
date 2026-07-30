@@ -27,8 +27,8 @@ RASPBERRY PI GPIO PINOUT
 
 1. MEDICINE TAKEN BUTTON
    - Function: Physical button to dispense pills and silence alarms.
-   - GPIO Pin: GPIO 17 (Pin 11)
-   - Connection: Connect one leg of the button to GPIO 17, and the other leg to GND (Pin 9 or 14).
+   - GPIO Pin: GPIO 21 (Pin 40)
+   - Connection: Connect one leg of the button to GPIO 21, and the other leg to GND (Pin 39).
 
 2. DHT11 TEMPERATURE SENSOR
    - Function: Monitors internal temperature for climate control.
@@ -82,4 +82,4 @@ RASPBERRY PI GPIO PINOUT
       * GPIO 8 (Pin 24) -> Screen CE0 (Chip Select)
       * GPIO 25 (Pin 22) -> Screen Reset
       * GPIO 24 (Pin 18) -> Screen RS/DC
-   - Note: Since you opted to use a physical button (GPIO 17) for dispensing instead of the broken touch controller on the Trixie OS, you do not need to wire the SPI Touch interrupt pins.
+   - Note: Since you opted to use a physical button (GPIO 21) for dispensing instead of the broken touch controller on the Trixie OS, you do not need to wire the SPI Touch interrupt pins.
