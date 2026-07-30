@@ -21,6 +21,8 @@ WorkingDirectory=$PROJECT_DIR
 # Try to connect bluetooth before starting the server
 ExecStartPre=/bin/bash $PROJECT_DIR/backend/bt_autoconnect.sh
 ExecStart=$PROJECT_DIR/venv/bin/uvicorn backend.main:app --host 0.0.0.0 --port 8000
+Environment="XDG_RUNTIME_DIR=/run/user/$(id -u $PI_USER)"
+Environment="PULSE_SERVER=unix:/run/user/$(id -u $PI_USER)/pulse/native"
 Restart=always
 RestartSec=5
 
