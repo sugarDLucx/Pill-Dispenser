@@ -5,17 +5,18 @@ const Decagon = ({ schedules, activeSlot, onSlotClick }) => {
   // To match the original SVG exactly, we can use the same path coordinates or calculate them dynamically.
   // Based on the provided code.html:
   // Points: (200,20), (305.8,54.4), (371.2,144.4), (371.2,255.6), (305.8,345.6), (200,380), (94.2,345.6), (28.8,255.6), (28.8,144.4), (94.2,54.4)
+  // Re-mapped IDs to match physical counter-clockwise layout starting from bottom
   const wedges = [
-    { id: 1, path: "M 200 200 L 200 20 L 305.8 54.4 Z" },
-    { id: 2, path: "M 200 200 L 305.8 54.4 L 371.2 144.4 Z" },
+    { id: 5, path: "M 200 200 L 200 20 L 305.8 54.4 Z" },
+    { id: 4, path: "M 200 200 L 305.8 54.4 L 371.2 144.4 Z" },
     { id: 3, path: "M 200 200 L 371.2 144.4 L 371.2 255.6 Z" },
-    { id: 4, path: "M 200 200 L 371.2 255.6 L 305.8 345.6 Z" },
-    { id: 5, path: "M 200 200 L 305.8 345.6 L 200 380 Z" },
-    { id: 6, path: "M 200 200 L 200 380 L 94.2 345.6 Z" },
-    { id: 7, path: "M 200 200 L 94.2 345.6 L 28.8 255.6 Z" },
+    { id: 2, path: "M 200 200 L 371.2 255.6 L 305.8 345.6 Z" },
+    { id: 1, path: "M 200 200 L 305.8 345.6 L 200 380 Z" }, // Old slot 5 is now Slot 1
+    { id: 10, path: "M 200 200 L 200 380 L 94.2 345.6 Z" },
+    { id: 9, path: "M 200 200 L 94.2 345.6 L 28.8 255.6 Z" },
     { id: 8, path: "M 200 200 L 28.8 255.6 L 28.8 144.4 Z" },
-    { id: 9, path: "M 200 200 L 28.8 144.4 L 94.2 54.4 Z" },
-    { id: 10, path: "M 200 200 L 94.2 54.4 L 200 20 Z" }
+    { id: 7, path: "M 200 200 L 28.8 144.4 L 94.2 54.4 Z" },
+    { id: 6, path: "M 200 200 L 94.2 54.4 L 200 20 Z" }
   ];
 
   const formatTime12hr = (timeStr) => {
@@ -58,9 +59,10 @@ const Decagon = ({ schedules, activeSlot, onSlotClick }) => {
           </filter>
         </defs>
         
-        {wedges.map((wedge) => {
+        {wedges.map((wedge, index) => {
           const schedule = schedules.find(s => s.compartment_id === wedge.id);
-          const angleDeg = -90 + 18 + (wedge.id - 1) * 36;
+          // Angle is calculated based on physical index (clockwise starting from top right)
+          const angleDeg = -90 + 18 + (index) * 36;
           const angleRad = angleDeg * Math.PI / 180;
           const r = 140; 
           const pos = {

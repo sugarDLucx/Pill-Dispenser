@@ -61,7 +61,10 @@ try:
     i2c = busio.I2C(board.SCL, board.SDA) if board else None
     pca = PCA9685(i2c) if i2c else PCA9685(None)
     pca.frequency = 50
-    servos = {i: servo.Servo(pca.channels[i]) for i in range(10)}
+    # Map Slot ID (1-10) to PCA9685 Channels (15 down to 6)
+    # Slot 1 -> Channel 15 (16th pin)
+    # Slot 10 -> Channel 6 (7th pin)
+    servos = {i: servo.Servo(pca.channels[16 - i]) for i in range(1, 11)}
 except Exception as e:
     print(f"Error initializing PCA9685: {e}")
 
@@ -247,7 +250,7 @@ def mark_medicine_taken():
     # Rotate servo
     try:
         if active_compartment_id:
-            s = servos.get(active_compartment_id - 1)
+            s = servos.get(active_compartment_id)
             if s:
                 s.angle = 90
                 time.sleep(1)
