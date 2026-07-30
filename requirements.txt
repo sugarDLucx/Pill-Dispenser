@@ -8,3 +8,5 @@ adafruit-circuitpython-dht>=4.0.3
 gpiozero>=2.0
 python-multipart>=0.0.9
 gTTS>=2.5.1
+rpi-lgpio>=0.4
+Adafruit-Blinka>=8.38.0
