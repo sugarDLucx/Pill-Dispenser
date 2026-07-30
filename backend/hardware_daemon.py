@@ -81,7 +81,7 @@ dispense_start_time = None
 current_temperature = 0
 current_humidity = 0
 cooling_active = False
-force_cooling_off = False
+cooling_mode = "auto" # 'auto', 'on', 'off'
 
 def send_sms(phone_number: str, message: str):
     if not phone_number:
@@ -189,14 +189,20 @@ def parse_sms_command(sender: str, message: str):
             db.commit()
             print(f"Removed schedules for {med_name}")
         elif cmd == "cool" and len(parts) >= 2:
-            global force_cooling_off
+            global cooling_mode, cooling_active
             subcmd = parts[1].lower()
             if subcmd == "off":
-                force_cooling_off = True
+                cooling_mode = "off"
+                cooling_active = False
                 if cooling_relay: cooling_relay.off()
                 print("Cooling forced OFF via SMS")
+            elif subcmd == "on":
+                cooling_mode = "on"
+                cooling_active = True
+                if cooling_relay: cooling_relay.on()
+                print("Cooling forced ON via SMS")
             elif subcmd == "auto":
-                force_cooling_off = False
+                cooling_mode = "auto"
                 print("Cooling set to AUTO via SMS")
     except Exception as e:
         print(f"Error parsing SMS command '{message}': {e}")
@@ -235,7 +241,7 @@ def sms_monitoring_loop():
         time.sleep(10)
 
 def temp_monitoring_loop():
-    global current_temperature, current_humidity, cooling_active, force_cooling_off
+    global current_temperature, current_humidity, cooling_active, cooling_mode
     while True:
         try:
             if hasattr(dht_device, 'temperature'):
@@ -244,12 +250,19 @@ def temp_monitoring_loop():
                 if temp is not None: current_temperature = temp
                 if hum is not None: current_humidity = hum
                 
-                if current_temperature > 25 and not force_cooling_off:
+                if cooling_mode == "on":
                     cooling_active = True
                     if cooling_relay: cooling_relay.on()
-                else:
+                elif cooling_mode == "off":
                     cooling_active = False
                     if cooling_relay: cooling_relay.off()
+                else:
+                    if current_temperature > 25:
+                        cooling_active = True
+                        if cooling_relay: cooling_relay.on()
+                    else:
+                        cooling_active = False
+                        if cooling_relay: cooling_relay.off()
         except RuntimeError:
             pass
         time.sleep(5)
