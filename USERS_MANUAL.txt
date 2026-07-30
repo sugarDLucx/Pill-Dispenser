@@ -8,6 +8,7 @@ This Smart Pill Dispenser securely stores up to 10 compartments of medication. I
 Setting up Users and Caretakers via SMS
 ---------------------------------------
 You can configure the system entirely via SMS to the device's phone number. Each SMS can be a maximum of 160 characters. 
+Note: The Smart Pill Dispenser is interactive. When you send configuration commands, it will immediately reply to you via SMS with the updated system status (e.g., listing all users, caretakers, pills, or cooling states).
 
 Available Commands:
 1. Set the Primary User:
@@ -19,6 +20,11 @@ Available Commands:
    Syntax: addcare [phone number]
    Example: addcare +0987654321
    Description: Adds a caretaker to the alert list. Caretakers receive alerts if the patient misses their medication after the 5-minute dispense window expires. Caretakers can also edit the medication schedule.
+
+3. Remove a Caretaker:
+   Syntax: removecare [phone number]
+   Example: removecare +0987654321
+   Description: Removes a specific caretaker from the alert list.
 
 Managing the Medication Schedule via SMS
 ----------------------------------------

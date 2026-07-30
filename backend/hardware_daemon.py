@@ -118,17 +118,43 @@ def parse_sms_command(sender: str, message: str):
     # For initial setup, we might allow it, but we assume the user can always set.
     
     cmd = parts[0].lower()
+    
+    def reply_users():
+        db.refresh(settings)
+        u = settings.user_mobile or "None"
+        c = settings.caretakers or "None"
+        send_sms(phone_number, f"User: {u}\nCare: {c}")
+
+    def reply_schedules():
+        schs = db.query(MedicationSchedule).order_by(MedicationSchedule.compartment_id).all()
+        if not schs:
+            send_sms(phone_number, "No pills scheduled.")
+            return
+        lines = []
+        for s in schs:
+            lines.append(f"{s.compartment_id}:{s.medicine_name}({s.time_slots})")
+        msg = ", ".join(lines)
+        if len(msg) > 150: msg = msg[:147] + "..."
+        send_sms(phone_number, f"Pills: {msg}")
+
     try:
         if cmd == "user" and len(parts) >= 2:
             settings.user_mobile = parts[1]
             db.commit()
-            print(f"User mobile set to {parts[1]}")
+            reply_users()
         elif cmd == "addcare" and len(parts) >= 2:
             current = settings.caretakers if settings.caretakers else ""
             if parts[1] not in current:
                 settings.caretakers = f"{current},{parts[1]}" if current else parts[1]
                 db.commit()
-                print(f"Caretaker added: {parts[1]}")
+            reply_users()
+        elif cmd == "removecare" and len(parts) >= 2:
+            target = parts[1]
+            if settings.caretakers:
+                cares = [c.strip() for c in settings.caretakers.split(",") if c.strip() and c.strip() != target]
+                settings.caretakers = ",".join(cares)
+                db.commit()
+            reply_users()
         elif cmd == "add" and len(parts) >= 5:
             # add [Compartment ID 1-10] [Medicine Name] [Frequency] [Time]...
             comp_id = int(parts[1])
@@ -158,7 +184,7 @@ def parse_sms_command(sender: str, message: str):
             sch.start_date = datetime.now().date()
             sch.end_date = datetime.now().date() + timedelta(days=365)
             db.commit()
-            print(f"Schedule added for comp {comp_id}")
+            reply_schedules()
         elif cmd == "edit" and len(parts) >= 5:
             # edit [Compartment ID 1-10] [Medicine Name] [Frequency] [Time]...
             comp_id = int(parts[1])
@@ -180,14 +206,14 @@ def parse_sms_command(sender: str, message: str):
                         parsed_times.append(t)
                 sch.time_slots = ",".join(parsed_times)
                 db.commit()
-                print(f"Schedule edited for comp {comp_id}")
+                reply_schedules()
         elif cmd == "remove" and len(parts) >= 2:
             med_name = parts[1]
             schs = db.query(MedicationSchedule).filter(MedicationSchedule.medicine_name.ilike(med_name)).all()
             for s in schs:
                 db.delete(s)
             db.commit()
-            print(f"Removed schedules for {med_name}")
+            reply_schedules()
         elif cmd == "cool" and len(parts) >= 2:
             global cooling_mode, cooling_active
             subcmd = parts[1].lower()
@@ -195,15 +221,15 @@ def parse_sms_command(sender: str, message: str):
                 cooling_mode = "off"
                 cooling_active = False
                 if cooling_relay: cooling_relay.off()
-                print("Cooling forced OFF via SMS")
+                send_sms(phone_number, "Cooling forced OFF")
             elif subcmd == "on":
                 cooling_mode = "on"
                 cooling_active = True
                 if cooling_relay: cooling_relay.on()
-                print("Cooling forced ON via SMS")
+                send_sms(phone_number, "Cooling forced ON")
             elif subcmd == "auto":
                 cooling_mode = "auto"
-                print("Cooling set to AUTO via SMS")
+                send_sms(phone_number, "Cooling set to AUTO")
     except Exception as e:
         print(f"Error parsing SMS command '{message}': {e}")
     finally:
