@@ -10,3 +10,4 @@ python-multipart>=0.0.9
 gTTS>=2.5.1
 rpi-lgpio>=0.4
 Adafruit-Blinka>=8.38.0
+adafruit-circuitpython-motor>=3.4.0
