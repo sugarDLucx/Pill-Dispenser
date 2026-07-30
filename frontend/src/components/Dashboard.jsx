@@ -22,7 +22,7 @@ const Dashboard = () => {
   useEffect(() => {
     const toggleTimer = setInterval(() => {
       setShowDecagonView(prev => !prev);
-    }, 5000);
+    }, 10000);
     return () => clearInterval(toggleTimer);
   }, []);
 

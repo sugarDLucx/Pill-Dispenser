@@ -79,6 +79,8 @@ is_dispense_window_active = False
 active_compartment_id = None
 dispense_start_time = None
 current_temperature = 0
+current_humidity = 0
+cooling_active = False
 force_cooling_off = False
 
 def send_sms(phone_number: str, message: str):
@@ -233,17 +235,21 @@ def sms_monitoring_loop():
         time.sleep(10)
 
 def temp_monitoring_loop():
-    global current_temperature, force_cooling_off
+    global current_temperature, current_humidity, cooling_active, force_cooling_off
     while True:
         try:
             if hasattr(dht_device, 'temperature'):
                 temp = dht_device.temperature
-                if temp is not None:
-                    current_temperature = temp
-                    if temp > 25 and not force_cooling_off:
-                        if cooling_relay: cooling_relay.on()
-                    else:
-                        if cooling_relay: cooling_relay.off()
+                hum = dht_device.humidity
+                if temp is not None: current_temperature = temp
+                if hum is not None: current_humidity = hum
+                
+                if current_temperature > 25 and not force_cooling_off:
+                    cooling_active = True
+                    if cooling_relay: cooling_relay.on()
+                else:
+                    cooling_active = False
+                    if cooling_relay: cooling_relay.off()
         except RuntimeError:
             pass
         time.sleep(5)

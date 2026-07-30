@@ -8,7 +8,7 @@ import threading
 
 from backend.database import engine, Base, get_db
 from backend.models import MedicationSchedule, SystemSettings
-from backend.hardware_daemon import mark_medicine_taken, main_loop, current_temperature
+from backend.hardware_daemon import mark_medicine_taken, main_loop, current_temperature, current_humidity, cooling_active
 import backend.hardware_daemon as hw
 
 # Create tables
@@ -131,6 +131,8 @@ def get_status(db: Session = Depends(get_db)):
 
     return {
         "temperature": current_temperature,
+        "humidity": current_humidity,
+        "cooling_active": cooling_active,
         "next_dose_time": next_dose_time,
         "next_dose_med": next_dose_med,
         "network_status": "Connected",
