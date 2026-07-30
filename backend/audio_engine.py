@@ -1,7 +1,7 @@
 import os
-os.environ["SDL_AUDIODRIVER"] = "pulse"  # Force Pygame to use PulseAudio/Pipewire instead of raw ALSA
-import pygame
 import time
+import subprocess
+import shutil
 
 AUDIO_DIR = os.path.join(os.path.dirname(__file__), "audio")
 
@@ -17,20 +17,14 @@ def play_audio(filename: str):
         return
 
     try:
-        if not pygame.mixer.get_init():
-            pygame.mixer.init(frequency=24000) # Standard TTS frequency
-    except pygame.error as e:
-        print(f"Pygame audio not available (likely missing audio device): {e}")
-        return
-        
-    try:
-        sound = pygame.mixer.Sound(filepath)
-        channel = pygame.mixer.find_channel()
-        if channel:
-            channel.play(sound)
-            # Wait for the sound to finish playing
-            while channel.get_busy():
-                pygame.time.wait(100)
+        # Try to use PulseAudio player first, as it perfectly routes to Bluetooth speakers
+        if shutil.which("paplay"):
+            subprocess.run(["paplay", filepath], check=False)
+        elif shutil.which("aplay"):
+            # Fallback to ALSA player
+            subprocess.run(["aplay", filepath], check=False)
+        else:
+            print("No audio player (paplay or aplay) found on the system.")
     except Exception as e:
         print(f"Error playing audio {filename}: {e}")
 
