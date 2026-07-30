@@ -17,11 +17,14 @@ def play_audio(filename: str):
         return
 
     try:
-        # Try to use PulseAudio player first, as it perfectly routes to Bluetooth speakers
-        if shutil.which("paplay"):
+        # Try to use PipeWire native player first
+        if shutil.which("pw-play"):
+            subprocess.run(["pw-play", filepath], check=False)
+        # Fallback to PulseAudio player
+        elif shutil.which("paplay"):
             subprocess.run(["paplay", filepath], check=False)
+        # Absolute fallback to ALSA player
         elif shutil.which("aplay"):
-            # Fallback to ALSA player
             subprocess.run(["aplay", filepath], check=False)
         else:
             print("No audio player (paplay or aplay) found on the system.")
