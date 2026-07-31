@@ -76,7 +76,7 @@ except Exception as e:
 
 # --- Global State Machine ---
 is_dispense_window_active = False
-active_compartment_id = None
+active_compartment_ids = []
 dispense_start_time = None
 current_temperature = 0
 current_humidity = 0
@@ -294,7 +294,7 @@ def temp_monitoring_loop():
         time.sleep(5)
 
 def mark_medicine_taken():
-    global is_dispense_window_active, active_compartment_id, dispense_start_time
+    global is_dispense_window_active, active_compartment_ids, dispense_start_time
     
     if not is_dispense_window_active:
         print("Button pressed but outside dispense window. Ignoring.")
@@ -305,28 +305,29 @@ def mark_medicine_taken():
     
     # Rotate servo
     try:
-        if active_compartment_id:
-            s = servos.get(active_compartment_id)
+        for comp_id in active_compartment_ids:
+            s = servos.get(comp_id)
             if s:
                 s.angle = 32
                 time.sleep(1)
                 s.angle = 0
+                time.sleep(0.5) # Wait for servo to physically travel back to 0
     except Exception as e:
         print(f"Servo error: {e}")
 
     # Reset State
     is_dispense_window_active = False
-    active_compartment_id = None
+    active_compartment_ids = []
     dispense_start_time = None
     
     play_audio("done_dispensing.wav")
     time.sleep(3)
     play_audio("satisfied.wav")
 
-def handle_missed_medication(schedule):
-    global is_dispense_window_active, active_compartment_id, dispense_start_time
+def handle_missed_medication(schedules):
+    global is_dispense_window_active, active_compartment_ids, dispense_start_time
     is_dispense_window_active = False
-    active_compartment_id = None
+    active_compartment_ids = []
     dispense_start_time = None
 
     play_audio("missed_alert.wav")
@@ -335,10 +336,13 @@ def handle_missed_medication(schedule):
     settings = db.query(SystemSettings).first()
     db.close()
     
-    if not settings:
+    if not schedules:
         return
+        
+    names = ", ".join([s.medicine_name for s in schedules])
+    slots = ", ".join([str(s.compartment_id) for s in schedules])
 
-    alert_msg = f"ALERT: Patient missed scheduled medication. Slot: {schedule.compartment_id}, Med: {schedule.medicine_name}, Freq: {schedule.frequency}."
+    alert_msg = f"ALERT: Patient missed scheduled medication. Slots: {slots}, Meds: {names}."
     user_msg = "Reminder: You missed your scheduled medication. Please take it immediately."
 
     if settings.user_mobile:
@@ -351,7 +355,7 @@ def handle_missed_medication(schedule):
                 send_sms(number, alert_msg)
 
 def main_loop():
-    global is_dispense_window_active, active_compartment_id, dispense_start_time
+    global is_dispense_window_active, active_compartment_ids, dispense_start_time
     print("Starting hardware daemon main loop...")
     threading.Thread(target=temp_monitoring_loop, daemon=True).start()
     threading.Thread(target=sms_monitoring_loop, daemon=True).start()
@@ -371,9 +375,9 @@ def main_loop():
                 print("5 minute timer expired!")
                 # Get the schedule to include in alert
                 db = SessionLocal()
-                schedule = db.query(MedicationSchedule).filter(MedicationSchedule.compartment_id == active_compartment_id).first()
+                schedules = db.query(MedicationSchedule).filter(MedicationSchedule.compartment_id.in_(active_compartment_ids)).all()
                 db.close()
-                handle_missed_medication(schedule)
+                handle_missed_medication(schedules)
             time.sleep(0.1)
             continue
 
@@ -390,24 +394,27 @@ def main_loop():
             ).all()
 
             triggered = False
+            matching_schedules = []
             for schedule in schedules:
                 if not schedule.time_slots: continue
                 times = [t.strip() for t in schedule.time_slots.split(",")]
                 if current_time_str in times:
-                    print(f"Scheduled time reached for {schedule.medicine_name}")
-                    is_dispense_window_active = True
-                    active_compartment_id = schedule.compartment_id
-                    dispense_start_time = now
-                    last_dispensed_minute = current_time_str
+                    matching_schedules.append(schedule)
                     
-                    play_audio("scheduled_time.wav")
-                    
-                    # Notify user
-                    settings = db.query(SystemSettings).first()
-                    if settings and settings.user_mobile:
-                        send_sms(settings.user_mobile, f"It is time to take your medication: {schedule.medicine_name}")
-                    triggered = True
-                    break # only trigger one schedule at an exact minute to avoid conflict
+            if matching_schedules:
+                print(f"Scheduled time reached for {[s.medicine_name for s in matching_schedules]}")
+                is_dispense_window_active = True
+                active_compartment_ids = [s.compartment_id for s in matching_schedules]
+                dispense_start_time = now
+                last_dispensed_minute = current_time_str
+                
+                play_audio("scheduled_time.wav")
+                
+                # Notify user
+                settings = db.query(SystemSettings).first()
+                if settings and settings.user_mobile:
+                    names = ", ".join([s.medicine_name for s in matching_schedules])
+                    send_sms(settings.user_mobile, f"It is time to take your medication: {names}")
             db.close()
             
         time.sleep(0.5)
