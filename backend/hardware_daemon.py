@@ -340,9 +340,9 @@ def mark_medicine_taken():
             s = servos.get(comp_id)
             if s:
                 if comp_id == 6:
-                    s.angle = 5
+                    s.angle = 0
                     time.sleep(1)
-                    s.angle = 37
+                    s.angle = 40
                 else:
                     s.angle = 70
                     time.sleep(1)
