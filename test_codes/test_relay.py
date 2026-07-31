@@ -1,7 +1,7 @@
 import time
 from gpiozero import DigitalOutputDevice
 
-RELAY_PIN = 27
+RELAY_PIN = 26
 
 try:
     print(f"Initializing Relay on GPIO {RELAY_PIN} as raw digital output...")
