@@ -6,20 +6,33 @@ from gpiozero import OutputDevice
 RELAY_PIN = 27
 
 try:
-    print(f"Initializing Relay on GPIO {RELAY_PIN}...")
-    # active_high=False means .on() pulls it LOW (turns relay ON), .off() pulls it HIGH (turns relay OFF)
-    relay = OutputDevice(RELAY_PIN, active_high=False)
+    print(f"Initializing Relay on GPIO {RELAY_PIN} as ACTIVE HIGH...")
+    relay = OutputDevice(RELAY_PIN, active_high=True)
     
-    print("Testing Relay...")
-    for i in range(3):
-        print(f"[{i+1}/3] Turning ON (You should hear a click)...")
+    print("Testing Active-High Logic...")
+    for i in range(2):
+        print("Sending HIGH (3.3V)...")
         relay.on()
         time.sleep(2)
+        print("Sending LOW (0V)...")
+        relay.off()
+        time.sleep(2)
         
-        print(f"[{i+1}/3] Turning OFF...")
+    relay.close() # Free the pin
+    
+    print(f"\nInitializing Relay on GPIO {RELAY_PIN} as ACTIVE LOW...")
+    relay = OutputDevice(RELAY_PIN, active_high=False)
+    
+    print("Testing Active-Low Logic...")
+    for i in range(2):
+        print("Sending LOW (0V)...")
+        relay.on()
+        time.sleep(2)
+        print("Sending HIGH (3.3V)...")
         relay.off()
         time.sleep(2)
 
-    print("Test Complete!")
+    print("\nTest Complete!")
+    relay.close()
 except Exception as e:
     print(f"Failed to test relay: {e}")
