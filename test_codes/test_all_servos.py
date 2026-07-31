@@ -35,6 +35,9 @@ def test_servos():
             s.angle = 32
             time.sleep(0.5)
             
+            # Release PWM signal to prevent jittering while resting
+            s.angle = None
+            
         print("\nAll servos tested successfully!")
         
     except KeyboardInterrupt:

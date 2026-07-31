@@ -312,6 +312,7 @@ def mark_medicine_taken():
                 time.sleep(1)
                 s.angle = 32
                 time.sleep(0.5) # Wait for servo to physically travel back to 32
+                s.angle = None  # Release the servo to stop jittering
     except Exception as e:
         print(f"Servo error: {e}")
 
