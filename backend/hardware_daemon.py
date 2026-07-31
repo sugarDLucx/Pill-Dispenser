@@ -342,9 +342,9 @@ def mark_medicine_taken():
                 if comp_id == 6:
                     s.angle = 0
                     time.sleep(1)
-                    s.angle = 80
+                    s.angle = 100
                 elif comp_id == 10:
-                    s.angle = 65
+                    s.angle = 60
                     time.sleep(1)
                     s.angle = 110
                 else:
