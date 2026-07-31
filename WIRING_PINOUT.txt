@@ -39,11 +39,11 @@ RASPBERRY PI GPIO PINOUT
 
 3. COOLING RELAY (FAN / PELTIER)
    - Function: Activates cooling when temp > 25°C.
-   - GPIO Pin: GPIO 17 (Pin 11)
+   - GPIO Pin: GPIO 27 (Pin 13)
    - CONTROL WIRING (To Pi):
      * VCC: 5V (From 5V Power Rail)
      * GND: GND (From Common Ground)
-     * IN (Signal): Connect to GPIO 17.
+     * IN (Signal): Connect to GPIO 27.
    - LOAD WIRING (To Cooler):
      * COM Terminal: 12V Positive (From 12V Power Supply)
      * NO Terminal: Connect to the Positive (Red) wires of both the Fan and Peltier.
