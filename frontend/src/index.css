@@ -26,6 +26,12 @@
   }
 }
 
+html {
+  /* The Pi LCD is 480x320. Tailwind uses rem (relative to 16px by default). 
+     Setting this to 10px scales the ENTIRE UI (text, padding, margins) down to 62.5% of its original size to perfectly fit the screen! */
+  font-size: 10px; 
+}
+
 * {
   cursor: none !important;
 }
