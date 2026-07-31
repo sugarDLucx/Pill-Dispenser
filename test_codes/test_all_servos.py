@@ -20,19 +20,19 @@ def test_servos():
     servos = {i: servo.Servo(pca.channels[16 - i]) for i in range(1, 11)}
 
     print("\n--- Starting Servo Sequence Test ---")
-    print("Each servo will rotate to 32 degrees, pause, and return to 0 degrees.")
+    print("Each servo will rotate to 0 degrees, pause, and return to 32 degrees.")
 
     try:
         for slot_id in range(1, 11):
             s = servos[slot_id]
             print(f"Testing Slot {slot_id} (PCA Channel {16 - slot_id})...")
             
-            # Rotate to 32 degrees
-            s.angle = 32
+            # Rotate to 0 degrees
+            s.angle = 0
             time.sleep(1.0)
             
-            # Return to 0 degrees
-            s.angle = 0
+            # Return to 32 degrees
+            s.angle = 32
             time.sleep(0.5)
             
         print("\nAll servos tested successfully!")

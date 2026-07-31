@@ -308,10 +308,10 @@ def mark_medicine_taken():
         for comp_id in active_compartment_ids:
             s = servos.get(comp_id)
             if s:
-                s.angle = 32
-                time.sleep(1)
                 s.angle = 0
-                time.sleep(0.5) # Wait for servo to physically travel back to 0
+                time.sleep(1)
+                s.angle = 32
+                time.sleep(0.5) # Wait for servo to physically travel back to 32
     except Exception as e:
         print(f"Servo error: {e}")
 
