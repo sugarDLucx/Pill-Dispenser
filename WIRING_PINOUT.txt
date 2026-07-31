@@ -74,7 +74,8 @@ RASPBERRY PI GPIO PINOUT
    - PROBLEM: If you plug the screen directly into the Pi, it physically blocks access to the I2C (Pins 3/5), UART (Pins 8/10), and GPIO pins you need for the other components!
    - SOLUTION 1 (Recommended): Use a "GPIO Expansion Board" or "Stackable Header" or "T-Cobbler". This allows you to plug the screen in on top, but gives you duplicate pins on the side to connect the SIM800L, PCA9685, DHT11, and Button.
    - SOLUTION 2 (Manual Wiring): Do not plug the screen directly onto the Pi. Instead, use jumper wires to connect only the required screen pins:
-      * 5V (Pin 2) -> Screen VCC
+      * 3.3V (Pin 1) -> Screen Pin 1 (3.3V Logic)
+      * 5V (Pin 2) -> Screen Pin 2 (5V Backlight)
       * GND (Pin 6) -> Screen GND
       * GPIO 11 (Pin 23) -> Screen SCLK (SPI Clock)
       * GPIO 9 (Pin 21) -> Screen MISO
