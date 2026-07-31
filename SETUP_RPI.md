@@ -93,11 +93,21 @@ If your Raspberry Pi has a touchscreen attached, you will want the UI to automat
 2. **Create a Systemd Service for the Frontend**:
    You can either serve the built React app (`npm run build`) via a simple HTTP server or run Vite.
 3. **Launch Chromium in Kiosk Mode**:
-   Edit the autostart file for the Raspberry Pi GUI:
+   First, ensure Chromium is installed (if you used a Lite OS version):
    ```bash
-   nano ~/.config/wayfire.ini # Or ~/.config/lxsession/LXDE-pi/autostart depending on OS version
+   sudo apt-get update && sudo apt-get install -y chromium-browser
    ```
-   Add the following line to launch the browser pointing to your local frontend:
+   
+   The most reliable way to launch Kiosk Mode on Debian 13 (Bookworm) is by creating a Desktop entry:
    ```bash
-   chromium-browser --kiosk --disable-pinch --overscroll-history-navigation=0 http://localhost:5173
+   mkdir -p ~/.config/autostart
+   nano ~/.config/autostart/kiosk.desktop
+   ```
+   Add the following configuration:
+   ```ini
+   [Desktop Entry]
+   Type=Application
+   Name=KioskMode
+   Exec=bash -c 'sleep 5 && chromium-browser --ozone-platform-hint=wayland --kiosk --noerrdialogs --disable-infobars --disable-pinch --overscroll-history-navigation=0 http://localhost:5173'
+   X-GNOME-Autostart-enabled=true
    ```
