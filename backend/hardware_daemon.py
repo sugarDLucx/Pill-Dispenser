@@ -342,7 +342,7 @@ def mark_medicine_taken():
                 if comp_id == 6:
                     s.angle = 0
                     time.sleep(1)
-                    s.angle = 45
+                    s.angle = 60
                 else:
                     s.angle = 70
                     time.sleep(1)
