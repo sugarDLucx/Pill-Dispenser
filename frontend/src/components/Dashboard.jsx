@@ -87,15 +87,15 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Wrapper to bound the Decagon strictly to its parent height. Added -mt-20 to move it higher. */}
-        <div className="w-full h-full max-h-full flex items-start justify-center overflow-hidden -mt-20">
+        {/* Wrapper to bound the Decagon strictly to its parent height. Added -mt-16 to move it higher (+10ish). */}
+        <div className="w-full h-full max-h-full flex items-start justify-center overflow-hidden -mt-16">
           <Decagon schedules={schedules} activeSlot={activeSlot} onSlotClick={handleSlotClick} />
         </div>
       </div>
 
       {/* RIGHT COLUMN: Huge Next Dose */}
-      {/* Added pr-10 and pb-28 to add more padding to the right and bottom */}
-      <div className="w-[50%] h-full flex flex-col gap-2 p-2 pr-10 pb-28">
+      {/* Added pr-10 and pb-16 to add even more padding to the right and bottom */}
+      <div className="w-[50%] h-full flex flex-col gap-2 p-2 pr-10 pb-16">
         <div className="bg-surface-container-low h-full w-full rounded-2xl border-4 border-surface-variant p-4 flex flex-col items-center justify-center text-center shadow-lg">
           <h2 className="text-3xl font-black text-on-surface-variant mb-4">NEXT DOSE</h2>
           <div className="text-6xl text-primary font-black tracking-tight mb-6">
