@@ -26,6 +26,10 @@
   }
 }
 
+* {
+  cursor: none !important;
+}
+
 body {
   @apply bg-background text-on-background h-screen w-screen overflow-hidden select-none flex flex-col font-body-lg selection:bg-secondary selection:text-on-secondary;
   -webkit-user-select: none;
