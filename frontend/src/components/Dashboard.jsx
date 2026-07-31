@@ -87,8 +87,8 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Wrapper to bound the Decagon strictly to its parent height. */}
-        <div className="w-full h-full max-h-full flex items-start justify-center overflow-hidden">
+        {/* Wrapper to bound the Decagon strictly to its parent height. Added -mt-8 to move it higher. */}
+        <div className="w-full h-full max-h-full flex items-start justify-center overflow-hidden -mt-8">
           <Decagon schedules={schedules} activeSlot={activeSlot} onSlotClick={handleSlotClick} />
         </div>
       </div>
