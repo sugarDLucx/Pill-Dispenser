@@ -43,7 +43,7 @@ from backend.audio_engine import play_audio
 # --- Hardware Setup ---
 BUTTON_PIN = 21
 RELAY_PIN = 26
-DHT_PIN = 4
+DHT_PIN = 19
 SIM_UART_PORT = "/dev/ttyS0"
 SIM_BAUDRATE = 9600
 

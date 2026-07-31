@@ -32,10 +32,10 @@ RASPBERRY PI GPIO PINOUT
 
 2. DHT11 TEMPERATURE SENSOR
    - Function: Monitors internal temperature for climate control.
-   - GPIO Pin: GPIO 4 (Pin 7)
+   - GPIO Pin: GPIO 19 (Pin 35)
    - VCC: 3.3V (Pin 1) or 5V (Pin 2) depending on your DHT module.
    - GND: GND (Pin 6)
-   - Data: Connect to GPIO 4. (If using a bare sensor, add a 4.7k-10k pull-up resistor between VCC and Data).
+   - Data: Connect to GPIO 19. (If using a bare sensor, add a 4.7k-10k pull-up resistor between VCC and Data).
 
 3. COOLING RELAY (FAN / PELTIER)
    - Function: Activates cooling when temp > 25°C.
