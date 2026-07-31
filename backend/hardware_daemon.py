@@ -86,20 +86,34 @@ cooling_mode = "auto" # 'auto', 'on', 'off'
 def send_sms(phone_number: str, message: str):
     if not phone_number:
         return
-    try:
-        ser = serial.Serial(SIM_UART_PORT, SIM_BAUDRATE, timeout=1)
-        ser.write(b"AT+CMGF=1\r")
-        time.sleep(0.5)
-        ser.write(f'AT+CMGS="{phone_number}"\r'.encode())
-        time.sleep(0.5)
-        ser.write(message.encode() + b"\r")
-        time.sleep(0.5)
-        ser.write(bytes([26])) # CTRL+Z
-        time.sleep(2)
-        ser.close()
-        print(f"SMS sent to {phone_number}")
-    except Exception as e:
-        print(f"Error sending SMS to {phone_number}: {e}")
+        
+    # SMS length limit is 160 characters. Chunk by 150 to be safe.
+    chunks = [message[i:i+150] for i in range(0, len(message), 150)]
+    
+    for i, chunk in enumerate(chunks):
+        try:
+            # If multipart, add a small page indicator like (1/2) if we want, but slicing is fine
+            if len(chunks) > 1:
+                prefix = f"({i+1}/{len(chunks)}) "
+                # adjust chunk if prefix makes it too long, but for simplicity we'll just prepend
+                chunk_data = (prefix + chunk)[:160]
+            else:
+                chunk_data = chunk
+
+            ser = serial.Serial(SIM_UART_PORT, SIM_BAUDRATE, timeout=1)
+            ser.write(b"AT+CMGF=1\r")
+            time.sleep(0.5)
+            ser.write(f'AT+CMGS="{phone_number}"\r'.encode())
+            time.sleep(0.5)
+            ser.write(chunk_data.encode() + b"\r")
+            time.sleep(0.5)
+            ser.write(bytes([26])) # CTRL+Z
+            time.sleep(3)
+            ser.close()
+            print(f"SMS chunk sent to {phone_number}")
+            time.sleep(1) # Pause before sending next chunk
+        except Exception as e:
+            print(f"Error sending SMS to {phone_number}: {e}")
 
 def parse_sms_command(sender: str, message: str):
     message = message.strip()
@@ -133,9 +147,8 @@ def parse_sms_command(sender: str, message: str):
         lines = []
         for s in schs:
             lines.append(f"{s.compartment_id}:{s.medicine_name}({s.time_slots})")
-        msg = ", ".join(lines)
-        if len(msg) > 150: msg = msg[:147] + "..."
-        send_sms(sender, f"Pills: {msg}")
+        msg = "\n".join(lines)
+        send_sms(sender, f"Pills:\n{msg}")
 
     try:
         if cmd == "user" and len(parts) >= 2:
@@ -223,11 +236,9 @@ def parse_sms_command(sender: str, message: str):
             lines = []
             for s in schs:
                 lines.append(f"{s.compartment_id}:{s.medicine_name}({s.time_slots})")
-            msg = ", ".join(lines) if lines else "None"
+            msg = "\n".join(lines) if lines else "None"
             
-            final_msg = f"User:{u}\nCare:{c}\nPills:{msg}"
-            if len(final_msg) > 150:
-                final_msg = final_msg[:147] + "..."
+            final_msg = f"User:{u}\nCare:{c}\nPills:\n{msg}"
             send_sms(sender, final_msg)
         elif cmd == "cool" and len(parts) >= 2:
             global cooling_mode, cooling_active
