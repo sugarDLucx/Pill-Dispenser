@@ -308,10 +308,10 @@ def mark_medicine_taken():
         for comp_id in active_compartment_ids:
             s = servos.get(comp_id)
             if s:
-                s.angle = 148
+                s.angle = 70
                 time.sleep(1)
-                s.angle = 180
-                time.sleep(0.5) # Wait for servo to physically travel back to 180
+                s.angle = 110
+                time.sleep(0.5) # Wait for servo to physically travel back to 110
                 s.angle = None  # Release the servo to stop jittering
     except Exception as e:
         print(f"Servo error: {e}")

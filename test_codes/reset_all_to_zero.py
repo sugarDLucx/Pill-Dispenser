@@ -16,17 +16,17 @@ def reset_servos():
 
     servos = {i: servo.Servo(pca.channels[16 - i]) for i in range(1, 11)}
 
-    print("\n--- Resetting all servos to 180 degrees ---")
+    print("\n--- Resetting all servos to 110 degrees ---")
 
     try:
         for slot_id in range(1, 11):
             s = servos[slot_id]
-            print(f"Resetting Slot {slot_id} to 180 degrees...")
-            s.angle = 180
+            print(f"Resetting Slot {slot_id} to 110 degrees...")
+            s.angle = 110
             time.sleep(0.5) # Give it half a second to move
             s.angle = None  # Turn off holding current
             
-        print("\nAll servos successfully reset to 180 degrees!")
+        print("\nAll servos successfully reset to 110 degrees!")
         
     except KeyboardInterrupt:
         print("\nTest cancelled by user.")
