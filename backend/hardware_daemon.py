@@ -72,7 +72,8 @@ try:
     servos = {}
     for i in range(1, 11):
         if i == 6:
-            servos[i] = servo.Servo(pca.channels[servo_mapping[i]], actuation_range=360)
+            # 360-degree positional servos usually require a wider PWM pulse range (500us to 2500us) to physically reach the full 360 degrees
+            servos[i] = servo.Servo(pca.channels[servo_mapping[i]], actuation_range=360, min_pulse=500, max_pulse=2500)
         else:
             servos[i] = servo.Servo(pca.channels[servo_mapping[i]])
 except Exception as e:
