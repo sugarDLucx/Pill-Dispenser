@@ -36,9 +36,9 @@ def test_servos():
             
             if slot_id == 6:
                 s.throttle = 1.0  # Forward
-                time.sleep(1.0)
+                time.sleep(1.5)
                 s.throttle = -1.0 # Backward
-                time.sleep(1.0)
+                time.sleep(1.5)
                 s.throttle = 0.0  # Stop
             elif slot_id == 10:
                 s.angle = 60

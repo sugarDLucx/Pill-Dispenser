@@ -346,9 +346,9 @@ def mark_medicine_taken():
             if s:
                 if comp_id == 6:
                     s.throttle = 1.0  # Spin Forward to drop pill
-                    time.sleep(1)
+                    time.sleep(1.5)
                     s.throttle = -1.0 # Spin Backward to return
-                    time.sleep(1)
+                    time.sleep(1.5)
                     s.throttle = 0.0  # Stop
                 elif comp_id == 10:
                     s.angle = 60
