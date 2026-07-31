@@ -214,6 +214,21 @@ def parse_sms_command(sender: str, message: str):
                 db.delete(s)
             db.commit()
             reply_schedules()
+        elif cmd == "list":
+            db.refresh(settings)
+            u = settings.user_mobile or "None"
+            c = settings.caretakers or "None"
+            schs = db.query(MedicationSchedule).order_by(MedicationSchedule.compartment_id).all()
+            
+            lines = []
+            for s in schs:
+                lines.append(f"{s.compartment_id}:{s.medicine_name}({s.time_slots})")
+            msg = ", ".join(lines) if lines else "None"
+            
+            final_msg = f"User:{u}\nCare:{c}\nPills:{msg}"
+            if len(final_msg) > 150:
+                final_msg = final_msg[:147] + "..."
+            send_sms(sender, final_msg)
         elif cmd == "cool" and len(parts) >= 2:
             global cooling_mode, cooling_active
             subcmd = parts[1].lower()
