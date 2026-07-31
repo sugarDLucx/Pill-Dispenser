@@ -46,8 +46,8 @@ const Decagon = ({ schedules, activeSlot, onSlotClick }) => {
   };
 
   return (
-    <div className="relative w-full h-full max-w-[400px] aspect-square flex items-center justify-center">
-      <svg viewBox="0 0 400 400" className="w-full h-full drop-shadow-lg">
+    <div className="relative w-full h-full aspect-square flex items-center justify-center min-h-0 min-w-0 mx-auto">
+      <svg viewBox="0 0 400 400" className="w-full h-full object-contain drop-shadow-lg">
         <defs>
           <filter id="inner-shadow">
             <feOffset dx="0" dy="2" />

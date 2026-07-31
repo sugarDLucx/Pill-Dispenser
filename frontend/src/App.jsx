@@ -30,25 +30,25 @@ function App() {
 
   return (
     <>
-      <header className="bg-surface border-b-2 border-surface-variant flex justify-between items-center w-full px-margin-page h-[120px] top-0 z-40">
-        <div className="font-headline-lg text-headline-lg font-bold text-on-surface flex items-center gap-4">
+      <header className="bg-surface border-b border-surface-variant flex justify-between items-center w-full px-4 h-[60px] top-0 z-40 shrink-0">
+        <div className="font-title-lg text-title-lg font-bold text-on-surface flex items-center gap-2">
           {formatTime(currentTime)} &bull; {formatDate(currentTime)}
         </div>
-        <div className="flex items-center gap-gutter text-on-surface-variant">
-          <div className="flex flex-col items-center hover:bg-surface-container-high p-2 rounded-lg cursor-pointer active:scale-95 transition-transform duration-150">
-            <span className="material-symbols-outlined text-[40px]">bluetooth</span>
+        <div className="flex items-center gap-4 text-on-surface-variant">
+          <div className="flex flex-col items-center hover:bg-surface-container-high p-1 rounded-lg cursor-pointer active:scale-95 transition-transform duration-150">
+            <span className="material-symbols-outlined text-[24px]">bluetooth</span>
           </div>
-          <div className="flex items-center gap-2 font-headline-md text-headline-md bg-surface-container-low border-2 border-surface-variant p-2 rounded-lg shadow-sm">
+          <div className="flex items-center gap-2 bg-surface-container-low border border-surface-variant p-1 px-2 rounded-lg shadow-sm">
             {sysStatus?.cooling_active && (
-              <span className="material-symbols-outlined text-[32px] text-primary animate-pulse mr-1" title="Cooling Active">
+              <span className="material-symbols-outlined text-[20px] text-primary animate-pulse" title="Cooling Active">
                 ac_unit
               </span>
             )}
-            <span className="material-symbols-outlined text-[40px]">thermostat</span>
-            <div className="flex flex-col">
+            <span className="material-symbols-outlined text-[24px]">thermostat</span>
+            <div className="flex flex-col text-sm font-medium leading-none">
               <span>{sysStatus?.temperature !== undefined ? `${sysStatus.temperature}°C` : '--°C'}</span>
-              <span className="text-sm text-on-surface-variant font-medium leading-tight">
-                {sysStatus?.humidity !== undefined ? `${sysStatus.humidity}% Hum` : '--% Hum'}
+              <span className="text-xs text-on-surface-variant">
+                {sysStatus?.humidity !== undefined ? `${sysStatus.humidity}% Hum` : '--%'}
               </span>
             </div>
           </div>
