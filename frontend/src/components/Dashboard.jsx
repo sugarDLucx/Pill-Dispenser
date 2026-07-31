@@ -69,56 +69,39 @@ const Dashboard = () => {
     <div className="flex-grow w-full h-full overflow-hidden relative flex flex-row p-2 gap-2 bg-surface-container-lowest">
       
       {/* LEFT COLUMN: Decagon */}
-      <div className="w-[55%] h-full relative flex items-center justify-center p-2">
-        <div className="absolute top-0 left-0 z-10 flex flex-col gap-1 bg-surface-container-highest/90 backdrop-blur rounded-lg p-2 border border-surface-variant shadow-md">
+      <div className="w-[50%] h-full relative flex items-center justify-center p-2">
+        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 bg-surface-container-highest/80 backdrop-blur rounded-lg p-2 border border-surface-variant shadow-md">
           <h3 className="font-bold text-on-surface text-xs text-center border-b border-surface-variant pb-1">Legend</h3>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-surface-container border border-surface-dim"></div>
-            <span className="font-bold text-on-surface text-xs">Empty</span>
+            <span className="font-bold text-on-surface text-[10px]">Empty</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-secondary-fixed border border-secondary-fixed-dim"></div>
-            <span className="font-bold text-on-surface text-xs">Scheduled</span>
+            <span className="font-bold text-on-surface text-[10px]">Scheduled</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-tertiary-fixed border border-tertiary-fixed-dim"></div>
-            <span className="font-bold text-on-surface text-xs">Active</span>
+            <span className="font-bold text-on-surface text-[10px]">Active</span>
           </div>
         </div>
-        <Decagon schedules={schedules} activeSlot={activeSlot} onSlotClick={handleSlotClick} />
+        
+        {/* Wrapper to bound the Decagon strictly to its parent height */}
+        <div className="w-full h-full max-h-full flex items-center justify-center overflow-hidden">
+          <Decagon schedules={schedules} activeSlot={activeSlot} onSlotClick={handleSlotClick} />
+        </div>
       </div>
 
-      {/* RIGHT COLUMN: Schedules and Next Dose */}
-      <div className="w-[45%] h-full flex flex-col gap-2">
-        
-        {/* Next Dose Header */}
-        <div className="bg-surface-container rounded-xl border border-surface-variant p-2 flex flex-col items-center justify-center text-center shadow-sm shrink-0">
-          <h2 className="text-sm font-bold text-on-background">Next Dose:</h2>
-          <div className="text-xl text-primary font-black">
+      {/* RIGHT COLUMN: Huge Next Dose */}
+      <div className="w-[50%] h-full flex flex-col gap-2 p-2">
+        <div className="bg-surface-container-low h-full w-full rounded-2xl border-4 border-surface-variant p-4 flex flex-col items-center justify-center text-center shadow-lg">
+          <h2 className="text-3xl font-black text-on-surface-variant mb-4">NEXT DOSE</h2>
+          <div className="text-6xl text-primary font-black tracking-tight mb-6">
             {status?.next_dose_time || "None"}
           </div>
-          <div className="text-xs font-bold text-on-surface-variant bg-surface-container-high px-2 py-1 rounded mt-1">
-            {status?.next_dose_med?.toUpperCase() || "NO MEDICATION"}
+          <div className="text-3xl font-black text-on-surface bg-surface-container-high px-6 py-3 rounded-xl shadow-inner border-2 border-surface-variant">
+            {status?.next_dose_med?.toUpperCase() || "NO MEDICATION SCHEDULED"}
           </div>
-        </div>
-
-        {/* Schedules List */}
-        <div className="flex-grow overflow-y-auto bg-surface-container-low rounded-xl border border-surface-variant shadow-sm p-2 flex flex-col gap-2 no-scrollbar">
-          <h2 className="text-center font-bold text-on-surface text-sm border-b border-surface-variant pb-1">Schedules</h2>
-          {schedules.length === 0 && <p className="text-center text-on-surface-variant text-sm mt-2">No schedules.</p>}
-          {schedules.map(sch => (
-              <div key={sch.compartment_id} className="bg-surface-container p-2 rounded-lg border border-surface-variant flex justify-between items-center cursor-pointer hover:bg-surface-variant transition-colors" onClick={() => handleSlotClick(sch.compartment_id)}>
-                <div className="flex flex-col">
-                    <span className="font-bold text-sm text-on-surface">Slot {sch.compartment_id}: {sch.medicine_name.toUpperCase()}</span>
-                    <span className="text-xs text-on-surface-variant font-medium">{sch.frequency.replace('_', ' ').toUpperCase()}</span>
-                </div>
-                <div className="flex flex-col items-end">
-                    {sch.time_slots.split(',').map((t, idx) => (
-                      <span key={idx} className="text-xs font-mono font-bold text-primary">{formatTime12Hour(t)}</span>
-                    ))}
-                </div>
-              </div>
-          ))}
         </div>
       </div>
 
