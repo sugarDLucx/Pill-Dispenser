@@ -52,7 +52,7 @@ med_button = None
 cooling_relay = None
 try:
     med_button = Button(BUTTON_PIN)
-    cooling_relay = OutputDevice(RELAY_PIN)
+    cooling_relay = OutputDevice(RELAY_PIN, active_high=False)
 except Exception as e:
     print(f"Error initializing GPIO: {e}")
 
