@@ -8,7 +8,6 @@ import threading
 
 from backend.database import engine, Base, get_db
 from backend.models import MedicationSchedule, SystemSettings
-from backend.hardware_daemon import mark_medicine_taken, main_loop, current_temperature, current_humidity, cooling_active
 import backend.hardware_daemon as hw
 
 # Create tables
@@ -28,7 +27,7 @@ app.add_middleware(
 # Start hardware daemon in background
 @app.on_event("startup")
 def startup_event():
-    daemon_thread = threading.Thread(target=main_loop, daemon=True)
+    daemon_thread = threading.Thread(target=hw.main_loop, daemon=True)
     daemon_thread.start()
 
 # --- Pydantic Models ---
@@ -130,9 +129,9 @@ def get_status(db: Session = Depends(get_db)):
         dispense_countdown = max(0, 300 - int((now - hw.dispense_start_time).total_seconds()))
 
     return {
-        "temperature": current_temperature,
-        "humidity": current_humidity,
-        "cooling_active": cooling_active,
+        "temperature": hw.current_temperature,
+        "humidity": hw.current_humidity,
+        "cooling_active": hw.cooling_active,
         "next_dose_time": next_dose_time,
         "next_dose_med": next_dose_med,
         "network_status": "Connected",
@@ -144,5 +143,5 @@ def get_status(db: Session = Depends(get_db)):
 
 @app.post("/api/medicine-taken")
 def medicine_taken():
-    mark_medicine_taken()
+    hw.mark_medicine_taken()
     return {"status": "Alarm Cancelled"}
