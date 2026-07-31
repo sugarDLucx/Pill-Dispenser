@@ -61,10 +61,15 @@ try:
     i2c = busio.I2C(board.SCL, board.SDA) if board else None
     pca = PCA9685(i2c) if i2c else PCA9685(None)
     pca.frequency = 50
-    # Map Slot ID (1-10) to PCA9685 Channels (15 down to 6)
-    # Slot 1 -> Channel 15 (16th pin)
-    # Slot 10 -> Channel 6 (7th pin)
-    servos = {i: servo.Servo(pca.channels[16 - i]) for i in range(1, 11)}
+    # Map Slot ID (1-10) to PCA9685 Channels
+    # Default is Slot 1 -> Channel 15, Slot 10 -> Channel 6
+    servo_mapping = {i: 16 - i for i in range(1, 11)}
+    
+    # User requested: servo 7 and 8 are switched
+    servo_mapping[7] = 8
+    servo_mapping[8] = 9
+    
+    servos = {i: servo.Servo(pca.channels[servo_mapping[i]]) for i in range(1, 11)}
 except Exception as e:
     print(f"Error initializing PCA9685: {e}")
 
@@ -334,10 +339,16 @@ def mark_medicine_taken():
         for comp_id in active_compartment_ids:
             s = servos.get(comp_id)
             if s:
-                s.angle = 70
-                time.sleep(1)
-                s.angle = 110
-                time.sleep(0.5) # Wait for servo to physically travel back to 110
+                if comp_id == 6:
+                    s.angle = 0
+                    time.sleep(1)
+                    s.angle = 32
+                else:
+                    s.angle = 70
+                    time.sleep(1)
+                    s.angle = 110
+                    
+                time.sleep(0.5) # Wait for servo to physically travel back
                 s.angle = None  # Release the servo to stop jittering
     except Exception as e:
         print(f"Servo error: {e}")

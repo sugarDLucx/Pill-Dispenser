@@ -14,10 +14,12 @@ def test_servos():
         print(f"Failed to initialize PCA9685: {e}")
         return
 
-    # In our project, Compartments 1-10 are mapped to PCA Channels 15 down to 6
-    # Slot 1 -> Channel 15
-    # Slot 10 -> Channel 6
-    servos = {i: servo.Servo(pca.channels[16 - i]) for i in range(1, 11)}
+    # Map Slot ID (1-10) to PCA9685 Channels
+    servo_mapping = {i: 16 - i for i in range(1, 11)}
+    servo_mapping[7] = 8
+    servo_mapping[8] = 9
+    
+    servos = {i: servo.Servo(pca.channels[servo_mapping[i]]) for i in range(1, 11)}
 
     print("\n--- Starting Servo Sequence Test ---")
     print("Each servo will rotate to 70 degrees, pause, and return to 110 degrees.")
@@ -25,14 +27,17 @@ def test_servos():
     try:
         for slot_id in range(1, 11):
             s = servos[slot_id]
-            print(f"Testing Slot {slot_id} (PCA Channel {16 - slot_id})...")
+            print(f"Testing Slot {slot_id} (PCA Channel {servo_mapping[slot_id]})...")
             
-            # Rotate to 70 degrees
-            s.angle = 70
-            time.sleep(1.0)
-            
-            # Return to 110 degrees
-            s.angle = 110
+            if slot_id == 6:
+                s.angle = 0
+                time.sleep(1.0)
+                s.angle = 32
+            else:
+                s.angle = 70
+                time.sleep(1.0)
+                s.angle = 110
+                
             time.sleep(0.5)
             
             # Release PWM signal to prevent jittering while resting
