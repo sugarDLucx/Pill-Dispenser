@@ -123,19 +123,19 @@ def parse_sms_command(sender: str, message: str):
         db.refresh(settings)
         u = settings.user_mobile or "None"
         c = settings.caretakers or "None"
-        send_sms(phone_number, f"User: {u}\nCare: {c}")
+        send_sms(sender, f"User: {u}\nCare: {c}")
 
     def reply_schedules():
         schs = db.query(MedicationSchedule).order_by(MedicationSchedule.compartment_id).all()
         if not schs:
-            send_sms(phone_number, "No pills scheduled.")
+            send_sms(sender, "No pills scheduled.")
             return
         lines = []
         for s in schs:
             lines.append(f"{s.compartment_id}:{s.medicine_name}({s.time_slots})")
         msg = ", ".join(lines)
         if len(msg) > 150: msg = msg[:147] + "..."
-        send_sms(phone_number, f"Pills: {msg}")
+        send_sms(sender, f"Pills: {msg}")
 
     try:
         if cmd == "user" and len(parts) >= 2:
@@ -221,15 +221,15 @@ def parse_sms_command(sender: str, message: str):
                 cooling_mode = "off"
                 cooling_active = False
                 if cooling_relay: cooling_relay.off()
-                send_sms(phone_number, "Cooling forced OFF")
+                send_sms(sender, "Cooling forced OFF")
             elif subcmd == "on":
                 cooling_mode = "on"
                 cooling_active = True
                 if cooling_relay: cooling_relay.on()
-                send_sms(phone_number, "Cooling forced ON")
+                send_sms(sender, "Cooling forced ON")
             elif subcmd == "auto":
                 cooling_mode = "auto"
-                send_sms(phone_number, "Cooling set to AUTO")
+                send_sms(sender, "Cooling set to AUTO")
     except Exception as e:
         print(f"Error parsing SMS command '{message}': {e}")
     finally:
