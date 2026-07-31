@@ -80,7 +80,8 @@ RASPBERRY PI GPIO PINOUT
       * GPIO 11 (Pin 23) -> Screen SCLK (SPI Clock)
       * GPIO 9 (Pin 21) -> Screen MISO
       * GPIO 10 (Pin 19) -> Screen MOSI
-      * GPIO 8 (Pin 24) -> Screen CE0 (Chip Select)
+      * GPIO 8 (Pin 24) -> Screen CE0 (LCD Chip Select)
+      * GPIO 7 (Pin 26) -> Screen CE1 (Touch Chip Select) *CRITICAL: Even if you don't use touch, this MUST be wired to keep the touch chip asleep, otherwise it crashes the SPI bus!*
       * GPIO 25 (Pin 22) -> Screen Reset
       * GPIO 24 (Pin 18) -> Screen RS/DC
-   - Note: Since you opted to use a physical button (GPIO 21) for dispensing instead of the broken touch controller on the Trixie OS, you do not need to wire the SPI Touch interrupt pins.
+   - Note: Since you opted to use a physical button (GPIO 21) for dispensing, you do not need to wire the Touch Interrupt (TP_IRQ) pin.
