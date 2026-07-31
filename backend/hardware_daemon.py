@@ -65,10 +65,6 @@ try:
     # Default is Slot 1 -> Channel 15, Slot 10 -> Channel 6
     servo_mapping = {i: 16 - i for i in range(1, 11)}
     
-    # User requested: servo 7 and 8 are switched
-    servo_mapping[7] = 8
-    servo_mapping[8] = 9
-    
     servos = {i: servo.Servo(pca.channels[servo_mapping[i]]) for i in range(1, 11)}
 except Exception as e:
     print(f"Error initializing PCA9685: {e}")

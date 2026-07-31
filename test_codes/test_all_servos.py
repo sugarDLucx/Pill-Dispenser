@@ -16,13 +16,13 @@ def test_servos():
 
     # Map Slot ID (1-10) to PCA9685 Channels
     servo_mapping = {i: 16 - i for i in range(1, 11)}
-    servo_mapping[7] = 8
-    servo_mapping[8] = 9
     
     servos = {i: servo.Servo(pca.channels[servo_mapping[i]]) for i in range(1, 11)}
 
     print("\n--- Starting Servo Sequence Test ---")
     print("Each servo will rotate to 70 degrees, pause, and return to 110 degrees.")
+    print("Waiting 2 seconds for hardware to settle...")
+    time.sleep(2.0)
 
     try:
         for slot_id in range(1, 11):
