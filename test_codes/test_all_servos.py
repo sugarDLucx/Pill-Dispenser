@@ -36,9 +36,9 @@ def test_servos():
             print(f"Testing Slot {slot_id} (PCA Channel {servo_mapping[slot_id]})...")
             
             if slot_id == 6:
-                s.angle = 0
-                time.sleep(1.0)
                 s.angle = 20
+                time.sleep(1.0)
+                s.angle = 0
             elif slot_id == 10:
                 s.angle = 60
                 time.sleep(1.0)
