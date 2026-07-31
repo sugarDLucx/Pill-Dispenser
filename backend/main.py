@@ -138,7 +138,7 @@ def get_status(db: Session = Depends(get_db)):
         "network_status": "Connected",
         "gsm_status": "Active",
         "is_dispense_window_active": hw.is_dispense_window_active,
-        "active_compartment_id": hw.active_compartment_id,
+        "active_compartment_ids": hw.active_compartment_ids,
         "dispense_countdown_seconds": dispense_countdown
     }
 
