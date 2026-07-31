@@ -94,8 +94,8 @@ const Dashboard = () => {
       </div>
 
       {/* RIGHT COLUMN: Huge Next Dose */}
-      {/* Added pr-10 to add padding to the right */}
-      <div className="w-[50%] h-full flex flex-col gap-2 p-2 pr-10">
+      {/* Added pr-10 and pb-8 to add padding to the right and bottom */}
+      <div className="w-[50%] h-full flex flex-col gap-2 p-2 pr-10 pb-8">
         <div className="bg-surface-container-low h-full w-full rounded-2xl border-4 border-surface-variant p-4 flex flex-col items-center justify-center text-center shadow-lg">
           <h2 className="text-3xl font-black text-on-surface-variant mb-4">NEXT DOSE</h2>
           <div className="text-6xl text-primary font-black tracking-tight mb-6">
