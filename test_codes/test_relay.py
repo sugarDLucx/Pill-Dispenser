@@ -1,9 +1,9 @@
 import time
 from gpiozero import OutputDevice
 
-# Relay is on GPIO 27. 
+# Relay is on GPIO 17. 
 # Most relay modules are active LOW, meaning pulling the pin to Ground (LOW) turns it ON.
-RELAY_PIN = 27
+RELAY_PIN = 17
 
 try:
     print(f"Initializing Relay on GPIO {RELAY_PIN} as ACTIVE HIGH...")
