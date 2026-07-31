@@ -69,31 +69,33 @@ const Dashboard = () => {
     <div className="flex-grow w-full h-full overflow-hidden relative flex flex-row p-2 gap-2 bg-surface-container-lowest">
       
       {/* LEFT COLUMN: Decagon */}
-      <div className="w-[50%] h-full relative flex items-center justify-center p-2">
-        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 bg-surface-container-highest/80 backdrop-blur rounded-lg p-2 border border-surface-variant shadow-md">
-          <h3 className="font-bold text-on-surface text-xs text-center border-b border-surface-variant pb-1">Legend</h3>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-surface-container border border-surface-dim"></div>
+      <div className="w-[50%] h-full relative flex flex-col items-center justify-start p-2">
+        {/* Horizontal Legend */}
+        <div className="w-full z-10 flex flex-row items-center justify-center gap-4 bg-surface-container-highest/60 backdrop-blur rounded-full px-4 py-1 border border-surface-variant shadow-sm mb-2">
+          <span className="font-bold text-on-surface text-xs mr-2">Legend:</span>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded bg-surface-container border border-surface-dim"></div>
             <span className="font-bold text-on-surface text-[10px]">Empty</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-secondary-fixed border border-secondary-fixed-dim"></div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded bg-secondary-fixed border border-secondary-fixed-dim"></div>
             <span className="font-bold text-on-surface text-[10px]">Scheduled</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-tertiary-fixed border border-tertiary-fixed-dim"></div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded bg-tertiary-fixed border border-tertiary-fixed-dim"></div>
             <span className="font-bold text-on-surface text-[10px]">Active</span>
           </div>
         </div>
         
-        {/* Wrapper to bound the Decagon strictly to its parent height */}
-        <div className="w-full h-full max-h-full flex items-center justify-center overflow-hidden">
+        {/* Wrapper to bound the Decagon strictly to its parent height. Added -mt-4 to move it higher. */}
+        <div className="w-full h-full max-h-full flex items-start justify-center overflow-hidden -mt-2">
           <Decagon schedules={schedules} activeSlot={activeSlot} onSlotClick={handleSlotClick} />
         </div>
       </div>
 
       {/* RIGHT COLUMN: Huge Next Dose */}
-      <div className="w-[50%] h-full flex flex-col gap-2 p-2">
+      {/* Added pr-4 and pb-4 to add padding to the right and bottom */}
+      <div className="w-[50%] h-full flex flex-col gap-2 p-2 pr-6 pb-6">
         <div className="bg-surface-container-low h-full w-full rounded-2xl border-4 border-surface-variant p-4 flex flex-col items-center justify-center text-center shadow-lg">
           <h2 className="text-3xl font-black text-on-surface-variant mb-4">NEXT DOSE</h2>
           <div className="text-6xl text-primary font-black tracking-tight mb-6">
