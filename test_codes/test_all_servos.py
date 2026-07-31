@@ -32,7 +32,7 @@ def test_servos():
             if slot_id == 6:
                 s.angle = 0
                 time.sleep(1.0)
-                s.angle = 100
+                s.angle = 180
             elif slot_id == 10:
                 s.angle = 60
                 time.sleep(1.0)
