@@ -295,6 +295,10 @@ def sms_monitoring_loop():
 
 def temp_monitoring_loop():
     global current_temperature, current_humidity, cooling_active, cooling_mode
+    last_cooler_run_time = None
+    cooler_on_duration = 120 # 2 minutes
+    cooler_cooldown_interval = 1800 # 30 minutes
+    
     while True:
         try:
             if hasattr(dht_device, 'temperature'):
@@ -303,6 +307,8 @@ def temp_monitoring_loop():
                 if temp is not None: current_temperature = temp
                 if hum is not None: current_humidity = hum
                 
+                now = datetime.now()
+                
                 if cooling_mode == "on":
                     cooling_active = True
                     if cooling_relay: cooling_relay.on()
@@ -310,12 +316,25 @@ def temp_monitoring_loop():
                     cooling_active = False
                     if cooling_relay: cooling_relay.off()
                 else:
-                    if current_temperature > 25:
-                        cooling_active = True
-                        if cooling_relay: cooling_relay.on()
+                    # Auto mode logic
+                    if cooling_active:
+                        # If it is currently running, check if 2 minutes have passed
+                        if last_cooler_run_time and (now - last_cooler_run_time).total_seconds() >= cooler_on_duration:
+                            cooling_active = False
+                            if cooling_relay: cooling_relay.off()
                     else:
-                        cooling_active = False
-                        if cooling_relay: cooling_relay.off()
+                        # If it is off, check if 30 minutes have passed since the start of the last run
+                        can_run = False
+                        if last_cooler_run_time is None:
+                            can_run = True
+                        else:
+                            if (now - last_cooler_run_time).total_seconds() >= cooler_cooldown_interval:
+                                can_run = True
+                                
+                        if can_run and current_temperature > 32.0:
+                            cooling_active = True
+                            last_cooler_run_time = now
+                            if cooling_relay: cooling_relay.on()
         except RuntimeError:
             pass
         time.sleep(5)
