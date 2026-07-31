@@ -19,12 +19,7 @@ def test_servos():
     servo_mapping[7] = 8
     servo_mapping[8] = 9
     
-    servos = {}
-    for i in range(1, 11):
-        if i == 6:
-            servos[i] = servo.ContinuousServo(pca.channels[servo_mapping[i]])
-        else:
-            servos[i] = servo.Servo(pca.channels[servo_mapping[i]])
+    servos = {i: servo.Servo(pca.channels[servo_mapping[i]]) for i in range(1, 11)}
 
     print("\n--- Starting Servo Sequence Test ---")
     print("Each servo will rotate to 70 degrees, pause, and return to 110 degrees.")
@@ -34,13 +29,7 @@ def test_servos():
             s = servos[slot_id]
             print(f"Testing Slot {slot_id} (PCA Channel {servo_mapping[slot_id]})...")
             
-            if slot_id == 6:
-                s.throttle = 1.0  # Forward
-                time.sleep(1.5)
-                s.throttle = -1.0 # Backward
-                time.sleep(1.5)
-                s.throttle = 0.0  # Stop
-            elif slot_id == 10:
+            if slot_id == 10:
                 s.angle = 60
                 time.sleep(1.0)
                 s.angle = 110
@@ -52,10 +41,7 @@ def test_servos():
             time.sleep(0.5)
             
             # Release PWM signal to prevent jittering while resting
-            if hasattr(s, 'angle'):
-                s.angle = None
-            else:
-                s.fraction = None
+            s.angle = None
             
         print("\nAll servos tested successfully!")
         

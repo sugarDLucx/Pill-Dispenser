@@ -69,12 +69,7 @@ try:
     servo_mapping[7] = 8
     servo_mapping[8] = 9
     
-    servos = {}
-    for i in range(1, 11):
-        if i == 6:
-            servos[i] = servo.ContinuousServo(pca.channels[servo_mapping[i]])
-        else:
-            servos[i] = servo.Servo(pca.channels[servo_mapping[i]])
+    servos = {i: servo.Servo(pca.channels[servo_mapping[i]]) for i in range(1, 11)}
 except Exception as e:
     print(f"Error initializing PCA9685: {e}")
 
@@ -344,13 +339,7 @@ def mark_medicine_taken():
         for comp_id in active_compartment_ids:
             s = servos.get(comp_id)
             if s:
-                if comp_id == 6:
-                    s.throttle = 1.0  # Spin Forward to drop pill
-                    time.sleep(1.5)
-                    s.throttle = -1.0 # Spin Backward to return
-                    time.sleep(1.5)
-                    s.throttle = 0.0  # Stop
-                elif comp_id == 10:
+                if comp_id == 10:
                     s.angle = 60
                     time.sleep(1)
                     s.angle = 110
@@ -360,10 +349,7 @@ def mark_medicine_taken():
                     s.angle = 110
                     
                 time.sleep(0.5) # Wait for servo to physically travel back
-                if hasattr(s, 'angle'):
-                    s.angle = None  # Release the positional servo to stop jittering
-                else:
-                    s.fraction = None # Release continuous servo
+                s.angle = None  # Release the servo to stop jittering
     except Exception as e:
         print(f"Servo error: {e}")
 
