@@ -73,15 +73,21 @@ RASPBERRY PI GPIO PINOUT
    - The 3.5-inch 480x320 display is designed as a "HAT" that plugs directly into Pins 1-26 of the Raspberry Pi.
    - PROBLEM: If you plug the screen directly into the Pi, it physically blocks access to the I2C (Pins 3/5), UART (Pins 8/10), and GPIO pins you need for the other components!
    - SOLUTION 1 (Recommended): Use a "GPIO Expansion Board" or "Stackable Header" or "T-Cobbler". This allows you to plug the screen in on top, but gives you duplicate pins on the side to connect the SIM800L, PCA9685, DHT11, and Button.
-   - SOLUTION 2 (Manual Wiring): Do not plug the screen directly onto the Pi. Instead, use jumper wires to connect only the required screen pins:
-      * 3.3V (Pin 1) -> Screen Pin 1 (3.3V Logic)
-      * 5V (Pin 2) -> Screen Pin 2 (5V Backlight)
-      * GND (Pin 6) -> Screen GND
-      * GPIO 11 (Pin 23) -> Screen SCLK (SPI Clock)
-      * GPIO 9 (Pin 21) -> Screen MISO
-      * GPIO 10 (Pin 19) -> Screen MOSI
-      * GPIO 8 (Pin 24) -> Screen CE0 (LCD Chip Select)
-      * GPIO 7 (Pin 26) -> Screen CE1 (Touch Chip Select) *CRITICAL: Even if you don't use touch, this MUST be wired to keep the touch chip asleep, otherwise it crashes the SPI bus!*
-      * GPIO 25 (Pin 22) -> Screen Reset
-      * GPIO 24 (Pin 18) -> Screen RS/DC
-   - Note: Since you opted to use a physical button (GPIO 21) for dispensing, you do not need to wire the Touch Interrupt (TP_IRQ) pin.
+   - SOLUTION 2 (Manual Wiring): If you cannot use an expansion board, use jumper wires to connect the following pins.
+      The LCD screen has a 26-pin header that perfectly matches the first 26 pins of the Raspberry Pi. Connect them 1-to-1 based on the table below:
+
+      SCREEN PIN NO. | PI PHYSICAL PIN | SYMBOL           | DESCRIPTION
+      -----------------------------------------------------------------------------------------
+      1, 17          | 1, 17           | 3.3V             | Power positive (3.3V power input)
+      2, 4           | 2, 4            | 5V               | Power positive (5V power input)
+      6, 9, 14, 20,25| 6, 9, 14, 20, 25| GND              | Ground
+      11             | 11 (GPIO 17)    | TP_IRQ           | Touch Panel interrupt (Optional if not using touch)
+      18             | 18 (GPIO 24)    | LCD_RS           | Instruction/Data Register selection
+      19             | 19 (GPIO 10)    | LCD_SI / TP_SI   | SPI data input (MOSI)
+      21             | 21 (GPIO 9)     | TP_SO            | SPI data output (MISO)
+      22             | 22 (GPIO 25)    | RST              | Reset
+      23             | 23 (GPIO 11)    | LCD_SCK / TP_SCK | SPI clock
+      24             | 24 (GPIO 8)     | LCD_CS           | LCD chip selection, low active
+      26             | 26 (GPIO 7)     | TP_CS            | Touch Panel chip selection (CRITICAL: MUST be connected to keep the SPI bus stable)
+
+      *(Note: Pins marked 'NC' in the datasheet do not need to be connected)*
