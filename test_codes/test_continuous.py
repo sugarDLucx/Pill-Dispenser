@@ -14,9 +14,9 @@ def test_continuous():
         print(f"Failed to initialize PCA9685: {e}")
         return
 
-    # Slot 6 is mapped to PCA Channel 8 (16 - 8 based on your swapped mapping)
+    # Slot 6 is mapped to PCA Channel 10 (16 - 6)
     print("\n--- Testing Servo 6 as a CONTINUOUS ROTATION Servo ---")
-    s = servo.ContinuousServo(pca.channels[8])
+    s = servo.ContinuousServo(pca.channels[10])
 
     try:
         print("Spinning FORWARD for 1 second...")
