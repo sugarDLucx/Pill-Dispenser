@@ -72,8 +72,7 @@ try:
     servos = {}
     for i in range(1, 11):
         if i == 6:
-            # 360-degree positional servos usually require a wider PWM pulse range (500us to 2500us) to physically reach the full 360 degrees
-            servos[i] = servo.Servo(pca.channels[servo_mapping[i]], actuation_range=360, min_pulse=500, max_pulse=2500)
+            servos[i] = servo.ContinuousServo(pca.channels[servo_mapping[i]])
         else:
             servos[i] = servo.Servo(pca.channels[servo_mapping[i]])
 except Exception as e:
@@ -346,9 +345,11 @@ def mark_medicine_taken():
             s = servos.get(comp_id)
             if s:
                 if comp_id == 6:
-                    s.angle = 20
+                    s.throttle = 1.0  # Spin Forward to drop pill
                     time.sleep(1)
-                    s.angle = 0
+                    s.throttle = -1.0 # Spin Backward to return
+                    time.sleep(1)
+                    s.throttle = 0.0  # Stop
                 elif comp_id == 10:
                     s.angle = 60
                     time.sleep(1)
@@ -359,7 +360,10 @@ def mark_medicine_taken():
                     s.angle = 110
                     
                 time.sleep(0.5) # Wait for servo to physically travel back
-                s.angle = None  # Release the servo to stop jittering
+                if hasattr(s, 'angle'):
+                    s.angle = None  # Release the positional servo to stop jittering
+                else:
+                    s.fraction = None # Release continuous servo
     except Exception as e:
         print(f"Servo error: {e}")
 

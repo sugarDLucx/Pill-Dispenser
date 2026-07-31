@@ -22,8 +22,7 @@ def test_servos():
     servos = {}
     for i in range(1, 11):
         if i == 6:
-            # 360-degree positional servos usually require a wider PWM pulse range (500us to 2500us) to physically reach the full 360 degrees
-            servos[i] = servo.Servo(pca.channels[servo_mapping[i]], actuation_range=360, min_pulse=500, max_pulse=2500)
+            servos[i] = servo.ContinuousServo(pca.channels[servo_mapping[i]])
         else:
             servos[i] = servo.Servo(pca.channels[servo_mapping[i]])
 
@@ -36,9 +35,11 @@ def test_servos():
             print(f"Testing Slot {slot_id} (PCA Channel {servo_mapping[slot_id]})...")
             
             if slot_id == 6:
-                s.angle = 20
+                s.throttle = 1.0  # Forward
                 time.sleep(1.0)
-                s.angle = 0
+                s.throttle = -1.0 # Backward
+                time.sleep(1.0)
+                s.throttle = 0.0  # Stop
             elif slot_id == 10:
                 s.angle = 60
                 time.sleep(1.0)
@@ -51,7 +52,10 @@ def test_servos():
             time.sleep(0.5)
             
             # Release PWM signal to prevent jittering while resting
-            s.angle = None
+            if hasattr(s, 'angle'):
+                s.angle = None
+            else:
+                s.fraction = None
             
         print("\nAll servos tested successfully!")
         
