@@ -306,37 +306,38 @@ def temp_monitoring_loop():
                 hum = dht_device.humidity
                 if temp is not None: current_temperature = temp
                 if hum is not None: current_humidity = hum
-                
-                now = datetime.now()
-                
-                if cooling_mode == "on":
-                    cooling_active = True
-                    if cooling_relay: cooling_relay.on()
-                elif cooling_mode == "off":
-                    cooling_active = False
-                    if cooling_relay: cooling_relay.off()
-                else:
-                    # Auto mode logic
-                    if cooling_active:
-                        # If it is currently running, check if 2 minutes have passed
-                        if last_cooler_run_time and (now - last_cooler_run_time).total_seconds() >= cooler_on_duration:
-                            cooling_active = False
-                            if cooling_relay: cooling_relay.off()
-                    else:
-                        # If it is off, check if 30 minutes have passed since the start of the last run
-                        can_run = False
-                        if last_cooler_run_time is None:
-                            can_run = True
-                        else:
-                            if (now - last_cooler_run_time).total_seconds() >= cooler_cooldown_interval:
-                                can_run = True
-                                
-                        if can_run and current_temperature > 32.0:
-                            cooling_active = True
-                            last_cooler_run_time = now
-                            if cooling_relay: cooling_relay.on()
         except RuntimeError:
             pass
+            
+        now = datetime.now()
+        
+        if cooling_mode == "on":
+            cooling_active = True
+            if cooling_relay: cooling_relay.on()
+        elif cooling_mode == "off":
+            cooling_active = False
+            if cooling_relay: cooling_relay.off()
+        else:
+            # Auto mode logic
+            if cooling_active:
+                # If it is currently running, check if 2 minutes have passed
+                if last_cooler_run_time and (now - last_cooler_run_time).total_seconds() >= cooler_on_duration:
+                    cooling_active = False
+                    if cooling_relay: cooling_relay.off()
+            else:
+                # If it is off, check if 30 minutes have passed since the start of the last run
+                can_run = False
+                if last_cooler_run_time is None:
+                    can_run = True
+                else:
+                    if (now - last_cooler_run_time).total_seconds() >= cooler_cooldown_interval:
+                        can_run = True
+                        
+                if can_run and current_temperature > 32.0:
+                    cooling_active = True
+                    last_cooler_run_time = now
+                    if cooling_relay: cooling_relay.on()
+                    
         time.sleep(5)
 
 def mark_medicine_taken():
