@@ -19,7 +19,12 @@ def test_servos():
     servo_mapping[7] = 8
     servo_mapping[8] = 9
     
-    servos = {i: servo.Servo(pca.channels[servo_mapping[i]]) for i in range(1, 11)}
+    servos = {}
+    for i in range(1, 11):
+        if i == 6:
+            servos[i] = servo.Servo(pca.channels[servo_mapping[i]], actuation_range=360)
+        else:
+            servos[i] = servo.Servo(pca.channels[servo_mapping[i]])
 
     print("\n--- Starting Servo Sequence Test ---")
     print("Each servo will rotate to 70 degrees, pause, and return to 110 degrees.")
@@ -32,7 +37,7 @@ def test_servos():
             if slot_id == 6:
                 s.angle = 0
                 time.sleep(1.0)
-                s.angle = 180
+                s.angle = 360
             elif slot_id == 10:
                 s.angle = 60
                 time.sleep(1.0)
