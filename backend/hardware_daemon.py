@@ -231,14 +231,22 @@ def parse_sms_command(sender: str, message: str):
             def bt_connect_thread(mac):
                 try:
                     script = f"""
-bluetoothctl <<EOF
-agent NoInputNoOutput
-default-agent
-pair {mac}
-trust {mac}
-connect {mac}
-EOF
-"""
+                    (
+                    echo "agent NoInputNoOutput"
+                    sleep 1
+                    echo "default-agent"
+                    sleep 1
+                    echo "remove {mac}"
+                    sleep 2
+                    echo "pair {mac}"
+                    sleep 6
+                    echo "trust {mac}"
+                    sleep 2
+                    echo "connect {mac}"
+                    sleep 6
+                    echo "quit"
+                    ) | bluetoothctl
+                    """
                     subprocess.run(["bash", "-c", script], capture_output=True)
                     time.sleep(3)
                     # Check connection
@@ -276,18 +284,32 @@ EOF
                     lines = res.stdout.strip().split("\n")
                     
                     found_devices = {}
+                    seen_macs = set()
                     reply_lines = ["Available Bluetooth Devices:"]
                     idx = 1
                     
+                    import re
+                    mac_pattern = re.compile(r'([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})')
+                    
                     for line in lines:
                         if not line.strip(): continue
-                        # Format: Device MAC_ADDRESS Name
-                        pts = line.split(" ", 2)
-                        if len(pts) >= 3:
-                            mac = pts[1]
-                            name = pts[2]
+                        # Find MAC in line
+                        match = mac_pattern.search(line)
+                        if match and "Device" in line:
+                            mac = match.group(0)
+                            
+                            if mac in seen_macs: continue
+                            
+                            # Try to extract the name (usually everything after the MAC)
+                            name_part = line[match.end():].strip()
+                            # Strip off ANSI codes or other garbage
+                            name_part = re.sub(r'\\x1b\[[0-9;]*m', '', name_part).strip()
+                            if not name_part or name_part == mac:
+                                name_part = "Unknown Device"
+                                
                             found_devices[str(idx)] = mac
-                            reply_lines.append(f"{idx}. {name} ({mac})")
+                            seen_macs.add(mac)
+                            reply_lines.append(f"{idx}. {name_part} ({mac})")
                             idx += 1
                     
                     if idx == 1:
