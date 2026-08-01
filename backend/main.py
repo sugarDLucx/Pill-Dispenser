@@ -99,9 +99,9 @@ def get_status(db: Session = Depends(get_db)):
     current_time_str = now.strftime("%H:%M")
     
     closest_time = None
-    closest_med = None
+    closest_meds = []
     earliest_time = None
-    earliest_med = None
+    earliest_meds = []
     
     for schedule in schedules:
         if not schedule.time_slots: continue
@@ -112,17 +112,21 @@ def get_status(db: Session = Depends(get_db)):
             # Track the absolute earliest slot in the day (for tomorrow's wraparound)
             if earliest_time is None or slot < earliest_time:
                 earliest_time = slot
-                earliest_med = schedule.medicine_name
+                earliest_meds = [schedule.medicine_name]
+            elif slot == earliest_time:
+                earliest_meds.append(schedule.medicine_name)
 
             # Track the closest future slot (for today)
             if slot > current_time_str:
                 if closest_time is None or slot < closest_time:
                     closest_time = slot
-                    closest_med = schedule.medicine_name
+                    closest_meds = [schedule.medicine_name]
+                elif slot == closest_time:
+                    closest_meds.append(schedule.medicine_name)
                     
     # If a future time exists today, use it. Otherwise, use tomorrow's earliest time.
     next_time_val = closest_time if closest_time else earliest_time
-    next_med_val = closest_med if closest_time else earliest_med
+    next_med_vals = closest_meds if closest_time else earliest_meds
                     
     if next_time_val:
         h, m = next_time_val.split(":")
@@ -133,7 +137,7 @@ def get_status(db: Session = Depends(get_db)):
         next_dose_time = f"{hour:02d}:{m} {ampm}"
         if not closest_time and next_time_val:
             next_dose_time += " (Tomorrow)"
-        next_dose_med = next_med_val
+        next_dose_med = ", ".join(next_med_vals)
 
     dispense_countdown = 0
     if hw.is_dispense_window_active and hw.dispense_start_time:
