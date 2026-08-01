@@ -2,6 +2,7 @@ import time
 import threading
 from datetime import datetime, timedelta
 import serial
+import RPi.GPIO as GPIO
 
 try:
     from gpiozero import Button, OutputDevice
@@ -48,11 +49,25 @@ SIM_UART_PORT = "/dev/ttyS0"
 SIM_BAUDRATE = 9600
 
 # Initialize Hardware Variables
+class OpenDrainRelay:
+    def __init__(self, pin):
+        self.pin = pin
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setwarnings(False)
+        self.off() # Start in OFF state (floating)
+        
+    def on(self):
+        GPIO.setup(self.pin, GPIO.OUT)
+        GPIO.output(self.pin, GPIO.LOW)
+        
+    def off(self):
+        GPIO.setup(self.pin, GPIO.IN)
+
 med_button = None
 cooling_relay = None
 try:
     med_button = Button(BUTTON_PIN)
-    cooling_relay = OutputDevice(RELAY_PIN, active_high=True, initial_value=False)
+    cooling_relay = OpenDrainRelay(RELAY_PIN)
 except Exception as e:
     print(f"Error initializing GPIO: {e}")
 
