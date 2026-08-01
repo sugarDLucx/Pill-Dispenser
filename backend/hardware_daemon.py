@@ -310,7 +310,7 @@ def temp_monitoring_loop():
                     hum = dht_device.humidity
                     if temp is not None: current_temperature = temp
                     if hum is not None: current_humidity = hum
-            except RuntimeError:
+            except Exception as dht_err:
                 pass
                 
             now = datetime.now()
