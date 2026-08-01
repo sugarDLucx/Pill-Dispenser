@@ -67,7 +67,10 @@ class OpenDrainRelay:
 med_button = None
 cooling_relay = None
 try:
-    med_button = Button(BUTTON_PIN)
+    # If your button triggers automatically, it means your wiring logic is inverted!
+    # By default, pull_up=True assumes the button connects to GROUND when pressed.
+    # If your button connects to 3.3V when pressed, change pull_up to False!
+    med_button = Button(BUTTON_PIN, bounce_time=0.1, pull_up=True)
     cooling_relay = OpenDrainRelay(RELAY_PIN)
 except Exception as e:
     print(f"Error initializing GPIO: {e}")
