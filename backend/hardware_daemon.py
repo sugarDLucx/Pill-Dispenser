@@ -212,28 +212,6 @@ def parse_sms_command(sender: str, message: str):
             sch.end_date = datetime.now().date() + timedelta(days=365)
             db.commit()
             reply_schedules()
-        elif cmd == "edit" and len(parts) >= 5:
-            # edit [Compartment ID 1-10] [Medicine Name] [Frequency] [Time]...
-            comp_id = int(parts[1])
-            sch = db.query(MedicationSchedule).filter(MedicationSchedule.compartment_id == comp_id).first()
-            if sch:
-                sch.medicine_name = parts[2]
-                sch.frequency = parts[3]
-                raw_times = " ".join(parts[4:]).upper()
-                raw_times = raw_times.replace(" AM", "AM").replace(" PM", "PM")
-                time_list = [t.strip() for t in raw_times.split(",") if t.strip()]
-                parsed_times = []
-                for t in time_list:
-                    try:
-                        if "AM" in t or "PM" in t:
-                            parsed_times.append(datetime.strptime(t, "%I:%M%p").strftime("%H:%M"))
-                        else:
-                            parsed_times.append(datetime.strptime(t, "%H:%M").strftime("%H:%M"))
-                    except ValueError:
-                        parsed_times.append(t)
-                sch.time_slots = ",".join(parsed_times)
-                db.commit()
-                reply_schedules()
         elif cmd == "remove" and len(parts) >= 2:
             med_name = parts[1]
             schs = db.query(MedicationSchedule).filter(MedicationSchedule.medicine_name.ilike(med_name)).all()
