@@ -104,6 +104,7 @@ cli_last_response = []
 
 def get_telegram_token():
     import os
+    import json
     config_path = os.path.join(os.path.dirname(__file__), "config.json")
     try:
         with open(config_path, "r") as f:
