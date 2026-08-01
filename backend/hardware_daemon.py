@@ -216,17 +216,19 @@ def parse_sms_command(sender: str, message: str):
 
     try:
         if cmd == "user" and len(parts) >= 2:
-            settings.user_mobile = parts[1]
+            target = sender if parts[1].lower() == "me" else parts[1]
+            settings.user_mobile = target
             db.commit()
             reply_users()
         elif cmd == "addcare" and len(parts) >= 2:
+            target = sender if parts[1].lower() == "me" else parts[1]
             current = settings.caretakers if settings.caretakers else ""
-            if parts[1] not in current:
-                settings.caretakers = f"{current},{parts[1]}" if current else parts[1]
+            if target not in current:
+                settings.caretakers = f"{current},{target}" if current else target
                 db.commit()
             reply_users()
         elif cmd == "removecare" and len(parts) >= 2:
-            target = parts[1]
+            target = sender if parts[1].lower() == "me" else parts[1]
             if settings.caretakers:
                 cares = [c.strip() for c in settings.caretakers.split(",") if c.strip() and c.strip() != target]
                 settings.caretakers = ",".join(cares)

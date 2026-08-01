@@ -30,18 +30,19 @@ You can now send all the same commands below (e.g. `list`, `add`, `user`) direct
 
 Available Commands:
 1. Set the Primary User:
-   Syntax: user [phone number]
-   Example: user +1234567890
+   Syntax: user [phone number] or user me
+   Example: user +639123456789 (for SMS)
+   Example: user me (for Telegram - automatically registers your chat ID)
    Description: Sets the primary patient's phone number. The patient will receive friendly reminders when it is time to take medication. The user can also add, edit, and remove schedules via SMS.
 
 2. Add a Caretaker:
-   Syntax: addcare [phone number]
-   Example: addcare +0987654321
+   Syntax: addcare [phone number] or addcare me
+   Example: addcare +639987654321
    Description: Adds a caretaker to the alert list. Caretakers receive alerts if the patient misses their medication after the 5-minute dispense window expires. Caretakers can also edit the medication schedule.
 
 3. Remove a Caretaker:
-   Syntax: removecare [phone number]
-   Example: removecare +0987654321
+   Syntax: removecare [phone number] or removecare me
+   Example: removecare +639987654321
    Description: Removes a specific caretaker from the alert list.
 
 Managing the Medication Schedule via SMS
