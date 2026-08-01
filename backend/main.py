@@ -48,6 +48,9 @@ class SettingsUpdate(BaseModel):
     caretaker_primary_mobile: str
     caretaker_secondary_mobile: Optional[str] = ""
 
+class CommandRequest(BaseModel):
+    command: str
+
 # --- Endpoints ---
 @app.get("/api/schedule", response_model=List[ScheduleResponse])
 def get_schedules(db: Session = Depends(get_db)):
@@ -77,6 +80,13 @@ def update_settings(settings: SettingsUpdate, db: Session = Depends(get_db)):
         db.add(db_settings)
     db.commit()
     return {"status": "success"}
+
+@app.post("/api/command")
+def execute_command(req: CommandRequest):
+    hw.cli_last_response = []
+    hw.parse_sms_command("CLI", req.command)
+    resp_text = "\n".join(hw.cli_last_response) if hw.cli_last_response else "Command executed silently."
+    return {"status": "success", "response": resp_text}
 
 @app.get("/api/status")
 def get_status(db: Session = Depends(get_db)):

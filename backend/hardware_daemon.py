@@ -99,10 +99,18 @@ current_humidity = 0
 cooling_active = False
 cooling_mode = "auto" # 'auto', 'on', 'off'
 
+cli_last_response = []
+
 def send_sms(phone_number: str, message: str):
     if not phone_number:
         return
         
+    if phone_number == "CLI":
+        global cli_last_response
+        cli_last_response.append(message)
+        print(f"\n[CLI Response]: {message}\n")
+        return
+
     # SMS length limit is 160 characters. Chunk by 150 to be safe.
     chunks = [message[i:i+150] for i in range(0, len(message), 150)]
     

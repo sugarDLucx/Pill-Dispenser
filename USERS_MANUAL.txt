@@ -10,6 +10,10 @@ Setting up Users and Caretakers via SMS
 You can configure the system entirely via SMS to the device's phone number. Each SMS can be a maximum of 160 characters. 
 Note: The Smart Pill Dispenser is interactive. When you send configuration commands, it will immediately reply to you via SMS with the updated system status (e.g., listing all users, caretakers, pills, or cooling states).
 
+Alternatively, if you have SSH access to the device, you can run all the identical commands via the terminal using the `cli.py` script:
+Example: `python3 cli.py list`
+Example: `python3 cli.py cool on`
+
 Available Commands:
 1. Set the Primary User:
    Syntax: user [phone number]
