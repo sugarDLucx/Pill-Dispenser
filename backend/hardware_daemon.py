@@ -263,14 +263,16 @@ EOF
             
             def bt_scan_thread():
                 try:
-                    # Run scan in background
-                    scan_proc = subprocess.Popen(["bluetoothctl", "scan", "on"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    time.sleep(10)
-                    scan_proc.terminate()
-                    subprocess.run(["bluetoothctl", "scan", "off"], capture_output=True)
-                    
-                    # Get devices
-                    res = subprocess.run(["bluetoothctl", "devices"], capture_output=True, text=True)
+                    # Keep bluetoothctl open for 10 seconds to discover new devices
+                    script = '''
+                    (
+                    echo "scan on"
+                    sleep 10
+                    echo "devices"
+                    echo "quit"
+                    ) | bluetoothctl
+                    '''
+                    res = subprocess.run(["bash", "-c", script], capture_output=True, text=True)
                     lines = res.stdout.strip().split("\n")
                     
                     found_devices = {}
