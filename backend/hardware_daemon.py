@@ -299,30 +299,49 @@ def sms_monitoring_loop():
             ser = serial.Serial(SIM_UART_PORT, SIM_BAUDRATE, timeout=1)
             ser.write(b"AT+CMGF=1\r")
             time.sleep(0.5)
-            ser.write(b'AT+CMGL="REC UNREAD"\r')
+            ser.write(b'AT+CMGL="ALL"\r')
             time.sleep(1)
-            response = ser.read(ser.in_waiting).decode(errors='ignore')
-            ser.close()
-
-            # Naive parsing of AT+CMGL response
-            # +CMGL: 1,"REC UNREAD","+1234567890",,"26/07/22,12:00:00+32"
-            # message text
-            lines = response.split('\n')
-            current_sender = None
-            for line in lines:
-                line = line.strip()
+            
+            lines = ser.readlines()
+            
+            i = 0
+            while i < len(lines):
+                line = lines[i].decode('utf-8', errors='ignore').strip()
                 if line.startswith("+CMGL:"):
                     parts = line.split(",")
                     if len(parts) >= 3:
-                        current_sender = parts[2].strip('"')
-                elif current_sender and line and not line.startswith("OK"):
-                    parse_sms_command(current_sender, line)
-                    current_sender = None
-
+                        sender = parts[2].strip('"')
+                        # Next line is the message
+                        if i + 1 < len(lines):
+                            message = lines[i+1].decode('utf-8', errors='ignore').strip()
+                            print(f"Received SMS from {sender}: {message}")
+                            
+                            # Delete it from SIM memory immediately
+                            index = parts[0].replace("+CMGL:", "").strip()
+                            ser.write(f"AT+CMGD={index}\r".encode())
+                            time.sleep(0.5)
+                            
+                            # Close port before processing so send_sms can acquire it
+                            ser.close()
+                            
+                            parse_sms_command(sender, message)
+                            
+                            # Re-open for the remainder of the loop if multiple messages exist
+                            ser = serial.Serial(SIM_UART_PORT, SIM_BAUDRATE, timeout=1)
+                i += 1
+                
+            if ser.is_open:
+                ser.close()
+                
         except Exception as e:
-            # Serial might be unavailable
-            pass
-        time.sleep(10)
+            print(f"Error in sms_monitoring_loop: {e}")
+            try:
+                if 'ser' in locals() and ser.is_open:
+                    ser.close()
+            except:
+                pass
+            
+        time.sleep(5)
 
 last_cooler_run_time = None
 
