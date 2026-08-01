@@ -117,6 +117,7 @@ def send_sms(phone_number: str, message: str):
             print(f"Error sending SMS to {phone_number}: {e}")
 
 def parse_sms_command(sender: str, message: str):
+    global cooling_mode, cooling_active
     message = message.strip()
     parts = message.split()
     if not parts:
@@ -242,7 +243,6 @@ def parse_sms_command(sender: str, message: str):
             final_msg = f"User:{u}\nCare:{c}\nPills:\n{msg}"
             send_sms(sender, final_msg)
         elif cmd == "cool" and len(parts) >= 2:
-            global cooling_mode, cooling_active
             subcmd = parts[1].lower()
             if subcmd == "off":
                 cooling_mode = "off"
@@ -293,50 +293,60 @@ def sms_monitoring_loop():
             pass
         time.sleep(10)
 
+last_cooler_run_time = None
+
 def temp_monitoring_loop():
-    global current_temperature, current_humidity, cooling_active, cooling_mode
-    last_cooler_run_time = None
+    global current_temperature, current_humidity, cooling_active, cooling_mode, last_cooler_run_time
     cooler_on_duration = 120 # 2 minutes
     cooler_cooldown_interval = 1800 # 30 minutes
     
     while True:
         try:
-            if hasattr(dht_device, 'temperature'):
-                temp = dht_device.temperature
-                hum = dht_device.humidity
-                if temp is not None: current_temperature = temp
-                if hum is not None: current_humidity = hum
-        except RuntimeError:
-            pass
+            try:
+                if hasattr(dht_device, 'temperature'):
+                    temp = dht_device.temperature
+                    hum = dht_device.humidity
+                    if temp is not None: current_temperature = temp
+                    if hum is not None: current_humidity = hum
+            except RuntimeError:
+                pass
+                
+            now = datetime.now()
             
-        now = datetime.now()
-        
-        if cooling_mode == "on":
-            cooling_active = True
-            if cooling_relay: cooling_relay.on()
-        elif cooling_mode == "off":
-            cooling_active = False
-            if cooling_relay: cooling_relay.off()
-        else:
-            # Auto mode logic
-            if cooling_active:
-                # If it is currently running, check if 2 minutes have passed
-                if last_cooler_run_time and (now - last_cooler_run_time).total_seconds() >= cooler_on_duration:
-                    cooling_active = False
-                    if cooling_relay: cooling_relay.off()
-            else:
-                # If it is off, check if 30 minutes have passed since the start of the last run
-                can_run = False
-                if last_cooler_run_time is None:
-                    can_run = True
-                else:
-                    if (now - last_cooler_run_time).total_seconds() >= cooler_cooldown_interval:
-                        can_run = True
-                        
-                if can_run and current_temperature > 32.0:
+            if cooling_mode == "on":
+                if not cooling_active:
                     cooling_active = True
                     last_cooler_run_time = now
                     if cooling_relay: cooling_relay.on()
+            elif cooling_mode == "off":
+                if cooling_active:
+                    cooling_active = False
+                    if cooling_relay: cooling_relay.off()
+            else:
+                # Auto mode logic
+                if cooling_active:
+                    # If it is currently running, check if 2 minutes have passed
+                    if last_cooler_run_time and (now - last_cooler_run_time).total_seconds() >= cooler_on_duration:
+                        cooling_active = False
+                        if cooling_relay: cooling_relay.off()
+                    elif last_cooler_run_time is None:
+                        # Fallback if it somehow got stuck running without a start time
+                        last_cooler_run_time = now
+                else:
+                    # If it is off, check if 30 minutes have passed since the start of the last run
+                    can_run = False
+                    if last_cooler_run_time is None:
+                        can_run = True
+                    else:
+                        if (now - last_cooler_run_time).total_seconds() >= cooler_cooldown_interval:
+                            can_run = True
+                            
+                    if can_run and current_temperature > 32.0:
+                        cooling_active = True
+                        last_cooler_run_time = now
+                        if cooling_relay: cooling_relay.on()
+        except Exception as e:
+            print(f"Error in temp_monitoring_loop: {e}")
                     
         time.sleep(5)
 

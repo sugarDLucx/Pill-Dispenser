@@ -25,7 +25,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadData();
-    const poll = setInterval(loadData, 1000); // Poll faster to get real-time countdown
+    const poll = setInterval(loadData, 1000); // Poll faster to get real-time countdown, now also re-fetches schedules!
     return () => clearInterval(poll);
   }, []);
 
@@ -113,7 +113,8 @@ const Dashboard = () => {
            <div className="bg-surface-container-lowest w-[90%] max-w-[600px] h-[90%] rounded-2xl border-4 border-error shadow-2xl flex flex-row overflow-hidden">
              
              {/* Left side: Alert Text */}
-             <div className="w-[60%] bg-error-container text-on-error-container flex flex-col items-center justify-center p-4 text-center">
+             {/* Match pb-20 padding */}
+             <div className="w-[60%] bg-error-container text-on-error-container flex flex-col items-center justify-center p-4 pb-20 text-center">
                 <span className="material-symbols-outlined text-[64px] mb-2 animate-pulse">warning</span>
                 <h2 className="text-2xl font-black mb-2 uppercase">Time To Take Medication</h2>
                 <div className="text-7xl font-black font-mono tracking-widest animate-pulse">
@@ -122,7 +123,8 @@ const Dashboard = () => {
              </div>
 
              {/* Right side: Dispense Button */}
-             <div className="w-[40%] flex items-center justify-center bg-tertiary-container p-4">
+             {/* Match pb-20 padding */}
+             <div className="w-[40%] flex items-center justify-center bg-tertiary-container p-4 pb-20">
                <button 
                 onClick={handleMedicineTaken}
                 className="w-full h-full rounded-xl flex flex-col items-center justify-center shadow-lg transition-all border-4 bg-tertiary text-on-tertiary border-tertiary-fixed hover:brightness-110 active:scale-95 group"
