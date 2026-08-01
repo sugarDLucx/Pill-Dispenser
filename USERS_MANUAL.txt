@@ -64,6 +64,11 @@ You can program the 10 inner compartments using simple SMS commands.
    Example: list
    Description: Returns a message containing the primary user, the caretakers on the alert list, and all programmed medication schedules (including their compartment numbers, medicine names, and 12-hour times).
 
+4. Scan and Connect to Bluetooth Audio:
+   Syntax: btscan
+   Example: btscan
+   Description: Scans for available Bluetooth speakers nearby. The system will reply with a numbered list of found devices. You can then simply reply with the number of the device you want to connect to.
+
 4. Override Cooling System:
    Syntax: cool [on/off/auto]
    Example: cool on

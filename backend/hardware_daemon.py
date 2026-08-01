@@ -3,6 +3,7 @@ import threading
 from datetime import datetime, timedelta
 import serial
 import requests
+import subprocess
 import RPi.GPIO as GPIO
 
 try:
@@ -101,7 +102,9 @@ dispense_start_time = None
 current_temperature = 0
 current_humidity = 0
 cooling_active = False
-cooling_mode = "auto" # 'auto', 'on', 'off'
+cooling_mode = "auto"
+
+bt_selection_mode = {}  # Format: { "TG_chatid": { "1": "MAC_ADDRESS" } }
 
 cli_last_response = []
 
@@ -217,7 +220,88 @@ def parse_sms_command(sender: str, message: str):
         msg = "\n".join(lines)
         send_sms(sender, f"Pills:\n{msg}")
 
+    # Check if user is in Bluetooth Selection Mode and replied with a number
+    if sender in bt_selection_mode and len(parts) == 1 and parts[0].isdigit():
+        choice = parts[0]
+        devices = bt_selection_mode[sender]
+        if choice in devices:
+            mac_addr = devices[choice]
+            send_sms(sender, f"Connecting to {mac_addr}... Please wait.")
+            
+            def bt_connect_thread(mac):
+                try:
+                    script = f"""
+bluetoothctl <<EOF
+agent NoInputNoOutput
+default-agent
+pair {mac}
+trust {mac}
+connect {mac}
+EOF
+"""
+                    subprocess.run(["bash", "-c", script], capture_output=True)
+                    time.sleep(3)
+                    # Check connection
+                    info = subprocess.run(["bluetoothctl", "info", mac], capture_output=True, text=True)
+                    if "Connected: yes" in info.stdout:
+                        send_sms(sender, f"Successfully connected to {mac}!")
+                    else:
+                        send_sms(sender, f"Failed to connect to {mac}.")
+                except Exception as e:
+                    send_sms(sender, f"Bluetooth error: {e}")
+            
+            threading.Thread(target=bt_connect_thread, args=(mac_addr,)).start()
+            del bt_selection_mode[sender]
+            return
+        else:
+            send_sms(sender, "Invalid selection. Please send a valid number from the list.")
+            return
+
     try:
+        if cmd == "btscan":
+            send_sms(sender, "Scanning for Bluetooth devices... Please wait 10 seconds.")
+            
+            def bt_scan_thread():
+                try:
+                    # Run scan in background
+                    scan_proc = subprocess.Popen(["bluetoothctl", "scan", "on"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    time.sleep(10)
+                    scan_proc.terminate()
+                    subprocess.run(["bluetoothctl", "scan", "off"], capture_output=True)
+                    
+                    # Get devices
+                    res = subprocess.run(["bluetoothctl", "devices"], capture_output=True, text=True)
+                    lines = res.stdout.strip().split("\n")
+                    
+                    found_devices = {}
+                    reply_lines = ["Available Bluetooth Devices:"]
+                    idx = 1
+                    
+                    for line in lines:
+                        if not line.strip(): continue
+                        # Format: Device MAC_ADDRESS Name
+                        pts = line.split(" ", 2)
+                        if len(pts) >= 3:
+                            mac = pts[1]
+                            name = pts[2]
+                            found_devices[str(idx)] = mac
+                            reply_lines.append(f"{idx}. {name} ({mac})")
+                            idx += 1
+                    
+                    if idx == 1:
+                        send_sms(sender, "No Bluetooth devices found.")
+                        if sender in bt_selection_mode:
+                            del bt_selection_mode[sender]
+                    else:
+                        bt_selection_mode[sender] = found_devices
+                        reply_lines.append("\nReply with the number of the device to connect.")
+                        send_sms(sender, "\n".join(reply_lines))
+                except Exception as e:
+                    send_sms(sender, f"Scan failed: {e}")
+                    
+            threading.Thread(target=bt_scan_thread).start()
+            return
+
         if cmd == "user" and len(parts) >= 2:
             target = sender if parts[1].lower() == "me" else parts[1]
             settings.user_mobile = target
