@@ -176,12 +176,15 @@ def parse_sms_command(sender: str, message: str):
                 for t in s.time_slots.split(","):
                     t = t.strip()
                     if t:
-                        h, m = t.split(":")
-                        hour = int(h)
-                        ampm = "PM" if hour >= 12 else "AM"
-                        hour = hour % 12
-                        hour = hour if hour else 12
-                        times.append(f"{hour:02d}:{m}{ampm}")
+                        try:
+                            h, m = t.split(":")
+                            hour = int(h)
+                            ampm = "PM" if hour >= 12 else "AM"
+                            hour = hour % 12
+                            hour = hour if hour else 12
+                            times.append(f"{hour:02d}:{m}{ampm}")
+                        except ValueError:
+                            times.append(t)
             times_str = ",".join(times)
             lines.append(f"{s.compartment_id}:{s.medicine_name}({times_str})")
         msg = "\n".join(lines)
@@ -255,12 +258,15 @@ def parse_sms_command(sender: str, message: str):
                     for t in s.time_slots.split(","):
                         t = t.strip()
                         if t:
-                            h, m = t.split(":")
-                            hour = int(h)
-                            ampm = "PM" if hour >= 12 else "AM"
-                            hour = hour % 12
-                            hour = hour if hour else 12
-                            times.append(f"{hour:02d}:{m}{ampm}")
+                            try:
+                                h, m = t.split(":")
+                                hour = int(h)
+                                ampm = "PM" if hour >= 12 else "AM"
+                                hour = hour % 12
+                                hour = hour if hour else 12
+                                times.append(f"{hour:02d}:{m}{ampm}")
+                            except ValueError:
+                                times.append(t)
                 times_str = ",".join(times)
                 lines.append(f"{s.compartment_id}:{s.medicine_name}({times_str})")
             msg = "\n".join(lines) if lines else "None"
