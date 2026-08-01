@@ -107,7 +107,7 @@ If your Raspberry Pi has a touchscreen attached, you will want the UI to automat
    ```ini
    [Desktop Entry]
    Type=Application
-   Name=KioskMode
-   Exec=bash -c 'sleep 5 && chromium --ozone-platform-hint=wayland --kiosk --noerrdialogs --disable-infobars --disable-pinch --overscroll-history-navigation=0 http://localhost:5173'
+   Name=Kiosk
+   Exec=bash -c 'sleep 120 && chromium --ozone-platform-hint=wayland --kiosk --noerrdialogs --disable-infobars --disable-pinch --overscroll-history-navigation=0 http://localhost:5173'
    X-GNOME-Autostart-enabled=true
    ```
