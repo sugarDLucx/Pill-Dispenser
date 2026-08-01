@@ -148,7 +148,19 @@ def parse_sms_command(sender: str, message: str):
             return
         lines = []
         for s in schs:
-            lines.append(f"{s.compartment_id}:{s.medicine_name}({s.time_slots})")
+            times = []
+            if s.time_slots:
+                for t in s.time_slots.split(","):
+                    t = t.strip()
+                    if t:
+                        h, m = t.split(":")
+                        hour = int(h)
+                        ampm = "PM" if hour >= 12 else "AM"
+                        hour = hour % 12
+                        hour = hour if hour else 12
+                        times.append(f"{hour:02d}:{m}{ampm}")
+            times_str = ",".join(times)
+            lines.append(f"{s.compartment_id}:{s.medicine_name}({times_str})")
         msg = "\n".join(lines)
         send_sms(sender, f"Pills:\n{msg}")
 
@@ -237,7 +249,19 @@ def parse_sms_command(sender: str, message: str):
             
             lines = []
             for s in schs:
-                lines.append(f"{s.compartment_id}:{s.medicine_name}({s.time_slots})")
+                times = []
+                if s.time_slots:
+                    for t in s.time_slots.split(","):
+                        t = t.strip()
+                        if t:
+                            h, m = t.split(":")
+                            hour = int(h)
+                            ampm = "PM" if hour >= 12 else "AM"
+                            hour = hour % 12
+                            hour = hour if hour else 12
+                            times.append(f"{hour:02d}:{m}{ampm}")
+                times_str = ",".join(times)
+                lines.append(f"{s.compartment_id}:{s.medicine_name}({times_str})")
             msg = "\n".join(lines) if lines else "None"
             
             final_msg = f"User:{u}\nCare:{c}\nPills:\n{msg}"

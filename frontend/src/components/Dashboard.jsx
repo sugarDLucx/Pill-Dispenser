@@ -94,8 +94,8 @@ const Dashboard = () => {
       </div>
 
       {/* RIGHT COLUMN: Huge Next Dose */}
-      {/* Added pr-10 and pb-20 to add padding to the right and bottom */}
-      <div className="w-[50%] h-full flex flex-col gap-2 p-2 pr-10 pb-20">
+      {/* Added pr-10 and pb-28 to add padding to the right and bottom */}
+      <div className="w-[50%] h-full flex flex-col gap-2 p-2 pr-10 pb-28">
         <div className="bg-surface-container-low h-full w-full rounded-2xl border-4 border-surface-variant p-4 flex flex-col items-center justify-center text-center shadow-lg">
           <h2 className="text-3xl font-black text-on-surface-variant mb-4">NEXT DOSE</h2>
           <div className="text-6xl text-primary font-black tracking-tight mb-6">
@@ -113,8 +113,8 @@ const Dashboard = () => {
            <div className="bg-surface-container-lowest w-[90%] max-w-[600px] h-[90%] rounded-2xl border-4 border-error shadow-2xl flex flex-row overflow-hidden">
              
              {/* Left side: Alert Text */}
-             {/* Match pb-20 padding */}
-             <div className="w-[60%] bg-error-container text-on-error-container flex flex-col items-center justify-center p-4 pb-20 text-center">
+             {/* Match pb-28 padding */}
+             <div className="w-[60%] bg-error-container text-on-error-container flex flex-col items-center justify-center p-4 pb-28 text-center">
                 <span className="material-symbols-outlined text-[64px] mb-2 animate-pulse">warning</span>
                 <h2 className="text-2xl font-black mb-2 uppercase">Time To Take Medication</h2>
                 <div className="text-7xl font-black font-mono tracking-widest animate-pulse">
@@ -123,8 +123,8 @@ const Dashboard = () => {
              </div>
 
              {/* Right side: Dispense Button */}
-             {/* Match pb-20 padding */}
-             <div className="w-[40%] flex items-center justify-center bg-tertiary-container p-4 pb-20">
+             {/* Match pb-28 padding */}
+             <div className="w-[40%] flex items-center justify-center bg-tertiary-container p-4 pb-28">
                <button 
                 onClick={handleMedicineTaken}
                 className="w-full h-full rounded-xl flex flex-col items-center justify-center shadow-lg transition-all border-4 bg-tertiary text-on-tertiary border-tertiary-fixed hover:brightness-110 active:scale-95 group"
