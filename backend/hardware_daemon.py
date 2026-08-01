@@ -418,11 +418,15 @@ def mark_medicine_taken():
                 if comp_id == 10:
                     s.angle = 60
                     time.sleep(1)
+                    s.angle = 110
+                elif comp_id == 4:
                     s.angle = 65
+                    time.sleep(1)
+                    s.angle = 110
                 else:
                     s.angle = 70
                     time.sleep(1)
-                    s.angle = 65
+                    s.angle = 110
                     
                 time.sleep(0.5) # Wait for servo to physically travel back
                 s.angle = None  # Release the servo to stop jittering
