@@ -621,12 +621,7 @@ def main_loop():
     global is_dispense_window_active, active_compartment_ids, dispense_start_time
     print("Starting hardware daemon main loop...")
     
-    try:
-        from sync_time import run_sync_loop
-        threading.Thread(target=run_sync_loop, daemon=True).start()
-    except Exception as e:
-        print(f"Failed to start time sync thread: {e}")
-        
+
     threading.Thread(target=temp_monitoring_loop, daemon=True).start()
     threading.Thread(target=sms_monitoring_loop, daemon=True).start()
     threading.Thread(target=telegram_polling_loop, daemon=True).start()
