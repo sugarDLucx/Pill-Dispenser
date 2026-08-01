@@ -11,16 +11,22 @@ sleep 10
 # For simplicity, we just assume if there's any non-bcm2835 device, we don't need BT.
 # But often RPi just shows bcm2835 ALSA. Let's just always try to connect to trusted BT as fallback.
 
+# Use a Here-Doc for background agent handling and connection
 echo "Starting Bluetooth Auto-Connect..."
-bluetoothctl power on
-bluetoothctl agent on
-bluetoothctl default-agent
+
+bluetoothctl <<EOF
+power on
+agent NoInputNoOutput
+default-agent
+EOF
 
 # Try to connect to all trusted/paired devices first
 PAIRED_DEVICES=$(bluetoothctl paired-devices | awk '{print $2}')
 for dev in $PAIRED_DEVICES; do
     echo "Attempting to connect to trusted device: $dev"
-    bluetoothctl connect $dev
+    bluetoothctl <<EOF
+connect $dev
+EOF
     sleep 3
     # Check if connected
     INFO=$(bluetoothctl info $dev)
@@ -43,11 +49,16 @@ for dev in $NEW_DEVICES; do
     INFO=$(bluetoothctl info $dev)
     if echo "$INFO" | grep -q "Audio Sink"; then
         echo "Found Audio Sink device: $dev. Attempting to pair and connect."
-        bluetoothctl pair $dev
+        
+        bluetoothctl <<EOF
+agent NoInputNoOutput
+default-agent
+pair $dev
+trust $dev
+connect $dev
+EOF
+        
         sleep 5
-        bluetoothctl trust $dev
-        bluetoothctl connect $dev
-        sleep 3
         if bluetoothctl info $dev | grep -q "Connected: yes"; then
             echo "Successfully connected to open device $dev. Exiting."
             exit 0

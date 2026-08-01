@@ -2,6 +2,7 @@ import time
 import threading
 from datetime import datetime, timedelta
 import serial
+import requests
 import RPi.GPIO as GPIO
 
 try:
@@ -101,6 +102,16 @@ cooling_mode = "auto" # 'auto', 'on', 'off'
 
 cli_last_response = []
 
+def get_telegram_token():
+    import os
+    config_path = os.path.join(os.path.dirname(__file__), "config.json")
+    try:
+        with open(config_path, "r") as f:
+            config = json.load(f)
+            return config.get("TELEGRAM_BOT_TOKEN", "").strip()
+    except Exception:
+        return ""
+
 def send_sms(phone_number: str, message: str):
     if not phone_number:
         return
@@ -109,6 +120,18 @@ def send_sms(phone_number: str, message: str):
         global cli_last_response
         cli_last_response.append(message)
         print(f"\n[CLI Response]: {message}\n")
+        return
+
+    if phone_number.startswith("TG_"):
+        chat_id = phone_number.replace("TG_", "")
+        token = get_telegram_token()
+        if token:
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            try:
+                requests.post(url, json={"chat_id": chat_id, "text": message})
+                print(f"Telegram sent to {chat_id}")
+            except Exception as e:
+                print(f"Error sending Telegram: {e}")
         return
 
     # SMS length limit is 160 characters. Chunk by 150 to be safe.
@@ -343,6 +366,38 @@ def sms_monitoring_loop():
             
         time.sleep(5)
 
+def telegram_polling_loop():
+    token = get_telegram_token()
+    if not token:
+        print("No Telegram Bot Token found. Telegram disabled.")
+        return
+        
+    print("Starting Telegram polling loop...")
+    offset = None
+    url = f"https://api.telegram.org/bot{token}/getUpdates"
+    
+    while True:
+        try:
+            params = {"timeout": 30}
+            if offset:
+                params["offset"] = offset
+            
+            resp = requests.get(url, params=params, timeout=40)
+            if resp.status_code == 200:
+                data = resp.json()
+                for update in data.get("result", []):
+                    offset = update["update_id"] + 1
+                    
+                    if "message" in update and "text" in update["message"]:
+                        chat_id = str(update["message"]["chat"]["id"])
+                        text = update["message"]["text"]
+                        print(f"Received Telegram from {chat_id}: {text}")
+                        # Route through existing SMS parser!
+                        parse_sms_command(f"TG_{chat_id}", text)
+        except Exception as e:
+            print(f"Error in telegram_polling_loop: {e}")
+            time.sleep(5)
+
 last_cooler_run_time = None
 
 def temp_monitoring_loop():
@@ -484,6 +539,7 @@ def main_loop():
         
     threading.Thread(target=temp_monitoring_loop, daemon=True).start()
     threading.Thread(target=sms_monitoring_loop, daemon=True).start()
+    threading.Thread(target=telegram_polling_loop, daemon=True).start()
     
     last_dispensed_minute = None
 

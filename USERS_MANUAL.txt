@@ -14,6 +14,20 @@ Alternatively, if you have SSH access to the device, you can run all the identic
 Example: `python3 cli.py list`
 Example: `python3 cli.py cool on`
 
+Setting up Telegram (WiFi/Internet Option)
+------------------------------------------
+Instead of using SMS, you can connect the Smart Pill Dispenser to your WiFi and control it via Telegram! 
+1. Open the Telegram app on your phone.
+2. Search for `BotFather` (the official Telegram bot creator).
+3. Send the message `/newbot` to BotFather and follow the prompts to name your bot.
+4. BotFather will give you a **Bot Token** (a long string of letters and numbers).
+5. Open the `backend/config.json` file on your Raspberry Pi:
+   `nano ~/Pill-Dispenser/backend/config.json`
+6. Paste your Bot Token inside the quotes for `TELEGRAM_BOT_TOKEN`.
+7. Restart the service: `sudo systemctl restart pill-backend.service`
+
+You can now send all the same commands below (e.g. `list`, `add`, `user`) directly to your Telegram bot!
+
 Available Commands:
 1. Set the Primary User:
    Syntax: user [phone number]
