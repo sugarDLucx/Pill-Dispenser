@@ -175,50 +175,7 @@ def telegram_polling_loop():
             time.sleep(5)
 ```
 
-5. INTERACTIVE BLUETOOTH SCANNING SUBSHELL
-------------------------------------------
-This algorithm forces the Linux `bluetoothctl` utility to remain open via a piped subshell. This guarantees it can discover completely new Bluetooth devices in real-time, filters out duplicate MAC addresses, and strips invisible ANSI escape characters from the terminal output.
-
-```python
-def bt_scan_thread():
-    # Keep bluetoothctl open for 10 seconds via Subshell Pipe
-    script = '''
-    (
-    echo "scan on"
-    sleep 10
-    echo "devices"
-    echo "quit"
-    ) | bluetoothctl
-    '''
-    res = subprocess.run(["bash", "-c", script], capture_output=True, text=True)
-    lines = res.stdout.strip().split("\n")
-    
-    found_devices = {}
-    seen_macs = set()
-    idx = 1
-    
-    import re
-    mac_pattern = re.compile(r'([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})')
-    
-    for line in lines:
-        if not line.strip(): continue
-        match = mac_pattern.search(line)
-        
-        # Filter for actual devices and prevent duplicates
-        if match and "Device" in line:
-            mac = match.group(0)
-            if mac in seen_macs: continue
-            
-            # Extract name and strip ANSI terminal colors
-            name_part = line[match.end():].strip()
-            name_part = re.sub(r'\x1b\[[0-9;]*m', '', name_part).strip()
-            
-            found_devices[str(idx)] = mac
-            seen_macs.add(mac)
-            idx += 1
-```
-
-6. SMS COMMUNICATION ALGORITHM (AT Commands)
+5. SMS COMMUNICATION ALGORITHM (AT Commands)
 --------------------------------------------
 This algorithm allows the system to send and receive text messages without an internet connection by communicating directly with the SIM800L cellular module using the UART Serial interface and AT Commands.
 
