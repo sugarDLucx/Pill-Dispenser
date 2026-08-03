@@ -237,3 +237,120 @@ def sms_monitoring_loop():
             
         time.sleep(5)
 ```
+
+6. UNIVERSAL REPLY ROUTER ALGORITHM (SMS + Telegram)
+----------------------------------------------------
+This algorithm is responsible for intercepting all outgoing text messages and dynamically deciding whether to send them via the internet (Telegram API) or via the cellular network (SIM800L), based purely on the structure of the recipient's ID.
+
+```python
+def send_sms(phone_number: str, message: str):
+    if not phone_number:
+        return
+        
+    # 1. INTERNET ROUTING (Telegram)
+    # If the ID starts with "TG_", route to the Telegram API
+    if phone_number.startswith("TG_"):
+        chat_id = phone_number.replace("TG_", "")
+        token = get_telegram_token()
+        if token:
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            try:
+                requests.post(url, json={"chat_id": chat_id, "text": message})
+            except Exception as e:
+                pass
+        return
+
+    # 2. CELLULAR ROUTING (SIM800L)
+    # Otherwise, split large messages into 160-character chunks
+    # and send sequentially via AT commands.
+    chunks = [message[i:i+150] for i in range(0, len(message), 150)]
+    for i, chunk in enumerate(chunks):
+        try:
+            if len(chunks) > 1:
+                chunk_data = (f"({i+1}/{len(chunks)}) " + chunk)[:160]
+            else:
+                chunk_data = chunk
+
+            ser = serial.Serial("/dev/ttyS0", 9600, timeout=1)
+            ser.write(b"AT+CMGF=1\r")
+            time.sleep(0.5)
+            ser.write(f'AT+CMGS="{phone_number}"\r'.encode())
+            time.sleep(0.5)
+            ser.write(chunk_data.encode() + b"\r")
+            time.sleep(0.5)
+            ser.write(bytes([26])) # CTRL+Z ends message
+            time.sleep(3)
+            ser.close()
+            time.sleep(1) # Pause before sending next chunk
+        except Exception as e:
+            pass
+```
+
+7. UNIVERSAL COMMAND PARSER ALGORITHM
+-------------------------------------
+This massive algorithm acts as the central brain for processing remote user commands. It takes the text extracted by either the SMS or Telegram listeners and executes the corresponding hardware or database action.
+
+```python
+def parse_sms_command(sender: str, message: str):
+    global cooling_mode, cooling_active
+    message = message.strip()
+    parts = message.split()
+    if not parts: return
+
+    db = SessionLocal()
+    settings = db.query(SystemSettings).first()
+    
+    cmd = parts[0].lower()
+    
+    def reply_users():
+        db.refresh(settings)
+        send_sms(sender, f"User: {settings.user_mobile or 'None'}\nCare: {settings.caretakers or 'None'}")
+
+    def reply_schedules():
+        schs = db.query(MedicationSchedule).order_by(MedicationSchedule.compartment_id).all()
+        if not schs:
+            send_sms(sender, "No pills scheduled.")
+        else:
+            lines = ["Schedules:"]
+            for s in schs:
+                lines.append(f"C{s.compartment_id}: {s.medicine_name} [{s.time_slots}]")
+            send_sms(sender, "\n".join(lines))
+
+    # ---- COMMAND ROUTING EXAMPLES ---- #
+    try:
+        if cmd == "status":
+            reply_users()
+            reply_schedules()
+            
+        elif cmd == "cooling":
+            if len(parts) > 1:
+                mode = parts[1].lower()
+                if mode in ["auto", "on", "off"]:
+                    cooling_mode = mode
+                    if mode == "on":
+                        cooling_active = True
+                        if cooling_relay: cooling_relay.on()
+                    elif mode == "off":
+                        cooling_active = False
+                        if cooling_relay: cooling_relay.off()
+                    send_sms(sender, f"Cooling mode set to {mode}.")
+                    
+        elif cmd == "addcare":
+            # Link caretakers
+            number = parts[1]
+            if number.lower() == "me" and sender.startswith("TG_"):
+                number = sender
+            
+            current = settings.caretakers or ""
+            c_list = [c.strip() for c in current.split(",") if c.strip()]
+            if number not in c_list:
+                c_list.append(number)
+                settings.caretakers = ",".join(c_list)
+                db.commit()
+                send_sms(sender, f"Added caretaker: {number}")
+                
+    except Exception as e:
+        send_sms(sender, f"Error processing command: {str(e)}")
+        
+    db.close()
+```
