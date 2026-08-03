@@ -217,3 +217,66 @@ def bt_scan_thread():
             seen_macs.add(mac)
             idx += 1
 ```
+
+6. SMS COMMUNICATION ALGORITHM (AT Commands)
+--------------------------------------------
+This algorithm allows the system to send and receive text messages without an internet connection by communicating directly with the SIM800L cellular module using the UART Serial interface and AT Commands.
+
+```python
+def send_sms(phone_number, message):
+    try:
+        # Open Serial Port to SIM800L
+        ser = serial.Serial("/dev/ttyS0", 9600, timeout=1)
+        
+        # Set SIM to SMS Text Mode
+        ser.write(b"AT+CMGF=1\r")
+        time.sleep(0.5)
+        
+        # Initiate Send Command
+        ser.write(f'AT+CMGS="{phone_number}"\r'.encode())
+        time.sleep(0.5)
+        
+        # Write Message and End with CTRL+Z (ASCII 26)
+        ser.write(message.encode() + b"\r")
+        time.sleep(0.5)
+        ser.write(bytes([26])) 
+        time.sleep(3)
+        ser.close()
+    except Exception as e:
+        print(f"Error sending SMS: {e}")
+
+def sms_monitoring_loop():
+    while True:
+        try:
+            ser = serial.Serial("/dev/ttyS0", 9600, timeout=1)
+            ser.write(b"AT+CMGF=1\r")
+            time.sleep(0.5)
+            
+            # Read all unread messages
+            ser.write(b'AT+CMGL="REC UNREAD"\r')
+            time.sleep(1)
+            
+            response = ser.read(ser.in_waiting).decode('utf-8', errors='ignore')
+            lines = response.split('\n')
+            
+            # Delete messages from SIM memory after reading to prevent overflow
+            ser.write(b"AT+CMGD=1,4\r")
+            time.sleep(0.5)
+            ser.close()
+            
+            # Parse SMS response block
+            for i, line in enumerate(lines):
+                if line.startswith("+CMGL:"):
+                    parts = line.split(",")
+                    if len(parts) >= 3:
+                        sender = parts[2].replace('"', '')
+                        # The next line contains the actual message text
+                        if i + 1 < len(lines):
+                            message = lines[i+1].strip()
+                            parse_sms_command(sender, message)
+                            
+        except Exception as e:
+            pass
+            
+        time.sleep(5)
+```
