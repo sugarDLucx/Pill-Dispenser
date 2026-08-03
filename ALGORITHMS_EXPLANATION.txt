@@ -1,245 +1,11 @@
 SMART PILL DISPENSER - ALGORITHMS AND SOURCE CODE
 =================================================
-This document contains the exact Python code implementations for the core algorithms driving the Smart Pill Dispenser. It is designed to be used as a reference or appendix for research documentation.
+This document contains the exact Python code implementations for the core algorithms driving the Smart Pill Dispenser. It is designed to be used as a reference or appendix for research documentation. The algorithms below are ordered exactly as they appear chronologically in `backend/hardware_daemon.py`.
 
-1. THE MAIN DAEMON LOOP (Non-Blocking State Machine Algorithm)
---------------------------------------------------------------
-The main loop operates as an asynchronous state machine. Instead of using `time.sleep()` which would block the CPU and paralyze the system, it continuously evaluates the time, sensors, and network flags hundreds of times per second.
-
-```python
-def main_loop():
-    global is_dispense_window_active, active_compartment_ids, dispense_start_time
-    
-    # Start background sensor threads
-    threading.Thread(target=temp_monitoring_loop, daemon=True).start()
-    threading.Thread(target=sms_monitoring_loop, daemon=True).start()
-    threading.Thread(target=telegram_polling_loop, daemon=True).start()
-    
-    last_dispensed_minute = None
-
-    while True:
-        now = datetime.now()
-        
-        # 1. Check Button Physical press
-        if getattr(med_button, 'is_pressed', False):
-            mark_medicine_taken()
-            
-        # 2. State Machine Window Countdown (5 Minutes)
-        if is_dispense_window_active:
-            if dispense_start_time and (now - dispense_start_time).total_seconds() > 300:
-                # 5 minute timer expired
-                db = SessionLocal()
-                schedules = db.query(MedicationSchedule).filter(MedicationSchedule.compartment_id.in_(active_compartment_ids)).all()
-                db.close()
-                handle_missed_medication(schedules)
-            time.sleep(0.1)
-            continue
-
-        # 3. Check Database for Scheduled Times
-        current_time_str = now.strftime("%H:%M")
-        if current_time_str != last_dispensed_minute:
-            db = SessionLocal()
-            current_date = now.date()
-            schedules = db.query(MedicationSchedule).filter(
-                MedicationSchedule.start_date <= current_date,
-                MedicationSchedule.end_date >= current_date
-            ).all()
-
-            triggered = False
-            for s in schedules:
-                if current_time_str in [t.strip() for t in s.time_slots.split(",") if t.strip()]:
-                    active_compartment_ids.append(s.compartment_id)
-                    triggered = True
-
-            if triggered:
-                is_dispense_window_active = True
-                dispense_start_time = now
-                play_audio("alarm.wav")
-
-            last_dispensed_minute = current_time_str
-            db.close()
-            
-        time.sleep(0.1)
-```
-
-2. HARDWARE DISPENSING ALGORITHM (Servo Kinematics)
----------------------------------------------------
-When the button is pressed inside an active window, the I2C PCA9685 controller translates the compartment requests into physical pulse-width-modulation (PWM) angles to drop the pills.
-
-```python
-def mark_medicine_taken():
-    global is_dispense_window_active, active_compartment_ids, dispense_start_time
-    
-    if not is_dispense_window_active:
-        return
-
-    play_audio("dispensing.wav")
-    
-    # Rotate servo dynamically based on mechanical constraints
-    try:
-        for comp_id in active_compartment_ids:
-            s = servos.get(comp_id)
-            if s:
-                if comp_id == 10:
-                    s.angle = 60 # Drop pill
-                    time.sleep(1) # Allow physical travel time
-                    s.angle = 110 # Return to resting position
-                elif comp_id == 4:
-                    s.angle = 65
-                    time.sleep(1)
-                    s.angle = 110
-                else:
-                    s.angle = 70
-                    time.sleep(1)
-                    s.angle = 110
-                    
-                time.sleep(0.5) 
-                s.angle = None  # Release the servo to stop electrical jittering
-    except Exception as e:
-        print(f"Servo error: {e}")
-
-    # Reset State Machine
-    is_dispense_window_active = False
-    active_compartment_ids = []
-    dispense_start_time = None
-```
-
-3. CLIMATE CONTROL ALGORITHM (Hysteresis & Cooldown)
+1. UNIVERSAL REPLY ROUTER ALGORITHM (SMS + Telegram)
 ----------------------------------------------------
-This algorithm continuously polls the DHT11 sensor. It utilizes a software "Cooldown" flag to prevent the physical relay from flickering on/off rapidly when the temperature hovers precisely at 32.0 degrees, which would otherwise wear out the relay contacts.
+File: backend/hardware_daemon.py (Lines 122 - 170)
 
-```python
-def temp_monitoring_loop():
-    global current_temperature, cooling_active, cooling_mode, last_cooler_run_time
-    cooler_on_duration = 120 # Run fan for 2 minutes minimum
-    cooler_cooldown_interval = 1800 # Prevent turning on again for 30 minutes
-    
-    while True:
-        now = datetime.now()
-        
-        # Auto mode logic
-        if cooling_active:
-            # If it is currently running, check if 2 minutes have passed
-            if last_cooler_run_time and (now - last_cooler_run_time).total_seconds() >= cooler_on_duration:
-                cooling_active = False
-                if cooling_relay: cooling_relay.off()
-        else:
-            # If it is off, check if 30 minutes have passed since the last cooldown
-            can_run = False
-            if last_cooler_run_time is None:
-                can_run = True
-            else:
-                if (now - last_cooler_run_time).total_seconds() >= cooler_cooldown_interval:
-                    can_run = True
-                    
-            if can_run and current_temperature > 32.0:
-                cooling_active = True
-                last_cooler_run_time = now
-                if cooling_relay: cooling_relay.on()
-                    
-        time.sleep(5)
-```
-
-4. TELEGRAM API LONG-POLLING ALGORITHM
---------------------------------------
-This algorithm allows the Raspberry Pi to securely receive messages instantly from the internet without exposing itself to port-forwarding or dynamic DNS configuration, by keeping an outgoing request "hung" open for 10 seconds.
-
-```python
-def telegram_polling_loop():
-    token = get_telegram_token()
-    last_update_id = 0
-    
-    while True:
-        try:
-            # Use a 10-second timeout to hold the connection open (Long Polling)
-            url = f"https://api.telegram.org/bot{token}/getUpdates?offset={last_update_id}&timeout=10"
-            response = requests.get(url, timeout=15)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if "result" in data:
-                    for result in data["result"]:
-                        # Shift the offset to mark the message as read
-                        last_update_id = result["update_id"] + 1
-                        
-                        if "message" in result and "text" in result["message"]:
-                            chat_id = str(result["message"]["chat"]["id"])
-                            text = result["message"]["text"]
-                            
-                            # Prefix sender to distinguish Telegram from SMS in the backend
-                            sender = "TG_" + chat_id
-                            
-                            # Send to Universal Command Parser
-                            parse_sms_command(sender, text)
-        except Exception as e:
-            time.sleep(5)
-```
-
-5. SMS COMMUNICATION ALGORITHM (AT Commands)
---------------------------------------------
-This algorithm allows the system to send and receive text messages without an internet connection by communicating directly with the SIM800L cellular module using the UART Serial interface and AT Commands.
-
-```python
-def send_sms(phone_number, message):
-    try:
-        # Open Serial Port to SIM800L
-        ser = serial.Serial("/dev/ttyS0", 9600, timeout=1)
-        
-        # Set SIM to SMS Text Mode
-        ser.write(b"AT+CMGF=1\r")
-        time.sleep(0.5)
-        
-        # Initiate Send Command
-        ser.write(f'AT+CMGS="{phone_number}"\r'.encode())
-        time.sleep(0.5)
-        
-        # Write Message and End with CTRL+Z (ASCII 26)
-        ser.write(message.encode() + b"\r")
-        time.sleep(0.5)
-        ser.write(bytes([26])) 
-        time.sleep(3)
-        ser.close()
-    except Exception as e:
-        print(f"Error sending SMS: {e}")
-
-def sms_monitoring_loop():
-    while True:
-        try:
-            ser = serial.Serial("/dev/ttyS0", 9600, timeout=1)
-            ser.write(b"AT+CMGF=1\r")
-            time.sleep(0.5)
-            
-            # Read all unread messages
-            ser.write(b'AT+CMGL="REC UNREAD"\r')
-            time.sleep(1)
-            
-            response = ser.read(ser.in_waiting).decode('utf-8', errors='ignore')
-            lines = response.split('\n')
-            
-            # Delete messages from SIM memory after reading to prevent overflow
-            ser.write(b"AT+CMGD=1,4\r")
-            time.sleep(0.5)
-            ser.close()
-            
-            # Parse SMS response block
-            for i, line in enumerate(lines):
-                if line.startswith("+CMGL:"):
-                    parts = line.split(",")
-                    if len(parts) >= 3:
-                        sender = parts[2].replace('"', '')
-                        # The next line contains the actual message text
-                        if i + 1 < len(lines):
-                            message = lines[i+1].strip()
-                            parse_sms_command(sender, message)
-                            
-        except Exception as e:
-            pass
-            
-        time.sleep(5)
-```
-
-6. UNIVERSAL REPLY ROUTER ALGORITHM (SMS + Telegram)
-----------------------------------------------------
 This algorithm is responsible for intercepting all outgoing text messages and dynamically deciding whether to send them via the internet (Telegram API) or via the cellular network (SIM800L), based purely on the structure of the recipient's ID.
 
 ```python
@@ -286,8 +52,10 @@ def send_sms(phone_number: str, message: str):
             pass
 ```
 
-7. UNIVERSAL COMMAND PARSER ALGORITHM
+2. UNIVERSAL COMMAND PARSER ALGORITHM
 -------------------------------------
+File: backend/hardware_daemon.py (Lines 172 - 431)
+
 This massive algorithm acts as the central brain for processing remote user commands. It takes the text extracted by either the SMS or Telegram listeners and executes the corresponding hardware or database action.
 
 ```python
@@ -355,8 +123,172 @@ def parse_sms_command(sender: str, message: str):
     db.close()
 ```
 
-8. MISSED MEDICATION ESCALATION ALGORITHM
+3. SMS COMMUNICATION ALGORITHM (AT Commands)
+--------------------------------------------
+File: backend/hardware_daemon.py (Lines 433 - 481)
+
+This algorithm loops in the background to read text messages without an internet connection by communicating directly with the SIM800L cellular module using the UART Serial interface and Hayes AT Commands.
+
+```python
+def sms_monitoring_loop():
+    while True:
+        try:
+            ser = serial.Serial("/dev/ttyS0", 9600, timeout=1)
+            ser.write(b"AT+CMGF=1\r")
+            time.sleep(0.5)
+            
+            # Read all unread messages
+            ser.write(b'AT+CMGL="REC UNREAD"\r')
+            time.sleep(1)
+            
+            response = ser.read(ser.in_waiting).decode('utf-8', errors='ignore')
+            lines = response.split('\n')
+            
+            # Delete messages from SIM memory after reading to prevent overflow
+            ser.write(b"AT+CMGD=1,4\r")
+            time.sleep(0.5)
+            ser.close()
+            
+            # Parse SMS response block
+            for i, line in enumerate(lines):
+                if line.startswith("+CMGL:"):
+                    parts = line.split(",")
+                    if len(parts) >= 3:
+                        sender = parts[2].replace('"', '')
+                        # The next line contains the actual message text
+                        if i + 1 < len(lines):
+                            message = lines[i+1].strip()
+                            parse_sms_command(sender, message)
+                            
+        except Exception as e:
+            pass
+            
+        time.sleep(5)
+```
+
+4. TELEGRAM API LONG-POLLING ALGORITHM
+--------------------------------------
+File: backend/hardware_daemon.py (Lines 483 - 515)
+
+This algorithm allows the Raspberry Pi to securely receive messages instantly from the internet without exposing itself to port-forwarding or dynamic DNS configuration, by keeping an outgoing request "hung" open for 10 seconds.
+
+```python
+def telegram_polling_loop():
+    token = get_telegram_token()
+    last_update_id = 0
+    
+    while True:
+        try:
+            # Use a 10-second timeout to hold the connection open (Long Polling)
+            url = f"https://api.telegram.org/bot{token}/getUpdates?offset={last_update_id}&timeout=10"
+            response = requests.get(url, timeout=15)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "result" in data:
+                    for result in data["result"]:
+                        # Shift the offset to mark the message as read
+                        last_update_id = result["update_id"] + 1
+                        
+                        if "message" in result and "text" in result["message"]:
+                            chat_id = str(result["message"]["chat"]["id"])
+                            text = result["message"]["text"]
+                            
+                            # Prefix sender to distinguish Telegram from SMS in the backend
+                            sender = "TG_" + chat_id
+                            
+                            # Send to Universal Command Parser
+                            parse_sms_command(sender, text)
+        except Exception as e:
+            time.sleep(5)
+```
+
+5. CLIMATE CONTROL ALGORITHM (Hysteresis & Cooldown)
+----------------------------------------------------
+File: backend/hardware_daemon.py (Lines 517 - 570)
+
+This algorithm continuously polls the DHT11 sensor. It utilizes a software "Cooldown" flag to prevent the physical relay from flickering on/off rapidly when the temperature hovers precisely at 32.0 degrees, which would otherwise wear out the relay contacts.
+
+```python
+def temp_monitoring_loop():
+    global current_temperature, cooling_active, cooling_mode, last_cooler_run_time
+    cooler_on_duration = 120 # Run fan for 2 minutes minimum
+    cooler_cooldown_interval = 1800 # Prevent turning on again for 30 minutes
+    
+    while True:
+        now = datetime.now()
+        
+        # Auto mode logic
+        if cooling_active:
+            # If it is currently running, check if 2 minutes have passed
+            if last_cooler_run_time and (now - last_cooler_run_time).total_seconds() >= cooler_on_duration:
+                cooling_active = False
+                if cooling_relay: cooling_relay.off()
+        else:
+            # If it is off, check if 30 minutes have passed since the last cooldown
+            can_run = False
+            if last_cooler_run_time is None:
+                can_run = True
+            else:
+                if (now - last_cooler_run_time).total_seconds() >= cooler_cooldown_interval:
+                    can_run = True
+                    
+            if can_run and current_temperature > 32.0:
+                cooling_active = True
+                last_cooler_run_time = now
+                if cooling_relay: cooling_relay.on()
+                    
+        time.sleep(5)
+```
+
+6. HARDWARE DISPENSING ALGORITHM (Servo Kinematics)
+---------------------------------------------------
+File: backend/hardware_daemon.py (Lines 572 - 612)
+
+When the button is pressed inside an active window, the I2C PCA9685 controller translates the compartment requests into physical pulse-width-modulation (PWM) angles to drop the pills.
+
+```python
+def mark_medicine_taken():
+    global is_dispense_window_active, active_compartment_ids, dispense_start_time
+    
+    if not is_dispense_window_active:
+        return
+
+    play_audio("dispensing.wav")
+    
+    # Rotate servo dynamically based on mechanical constraints
+    try:
+        for comp_id in active_compartment_ids:
+            s = servos.get(comp_id)
+            if s:
+                if comp_id == 10:
+                    s.angle = 60 # Drop pill
+                    time.sleep(1) # Allow physical travel time
+                    s.angle = 110 # Return to resting position
+                elif comp_id == 4:
+                    s.angle = 65
+                    time.sleep(1)
+                    s.angle = 110
+                else:
+                    s.angle = 70
+                    time.sleep(1)
+                    s.angle = 110
+                    
+                time.sleep(0.5) 
+                s.angle = None  # Release the servo to stop electrical jittering
+    except Exception as e:
+        print(f"Servo error: {e}")
+
+    # Reset State Machine
+    is_dispense_window_active = False
+    active_compartment_ids = []
+    dispense_start_time = None
+```
+
+7. MISSED MEDICATION ESCALATION ALGORITHM
 -----------------------------------------
+File: backend/hardware_daemon.py (Lines 614 - 642)
+
 This algorithm triggers if the patient fails to press the physical hardware button within the 5-minute dispensing window. It aggregates the list of missed medications and escalates the warning to the registered caretakers.
 
 ```python
@@ -395,4 +327,66 @@ def handle_missed_medication(schedules):
             number = number.strip()
             if number:
                 send_sms(number, alert_msg)
+```
+
+8. THE MAIN DAEMON LOOP (Non-Blocking State Machine Algorithm)
+--------------------------------------------------------------
+File: backend/hardware_daemon.py (Lines 644 - 714)
+
+The main loop operates as an asynchronous state machine. Instead of using `time.sleep()` which would block the CPU and paralyze the system, it continuously evaluates the time, sensors, and network flags hundreds of times per second.
+
+```python
+def main_loop():
+    global is_dispense_window_active, active_compartment_ids, dispense_start_time
+    
+    # Start background sensor threads
+    threading.Thread(target=temp_monitoring_loop, daemon=True).start()
+    threading.Thread(target=sms_monitoring_loop, daemon=True).start()
+    threading.Thread(target=telegram_polling_loop, daemon=True).start()
+    
+    last_dispensed_minute = None
+
+    while True:
+        now = datetime.now()
+        
+        # 1. Check Button Physical press
+        if getattr(med_button, 'is_pressed', False):
+            mark_medicine_taken()
+            
+        # 2. State Machine Window Countdown (5 Minutes)
+        if is_dispense_window_active:
+            if dispense_start_time and (now - dispense_start_time).total_seconds() > 300:
+                # 5 minute timer expired
+                db = SessionLocal()
+                schedules = db.query(MedicationSchedule).filter(MedicationSchedule.compartment_id.in_(active_compartment_ids)).all()
+                db.close()
+                handle_missed_medication(schedules)
+            time.sleep(0.1)
+            continue
+
+        # 3. Check Database for Scheduled Times
+        current_time_str = now.strftime("%H:%M")
+        if current_time_str != last_dispensed_minute:
+            db = SessionLocal()
+            current_date = now.date()
+            schedules = db.query(MedicationSchedule).filter(
+                MedicationSchedule.start_date <= current_date,
+                MedicationSchedule.end_date >= current_date
+            ).all()
+
+            triggered = False
+            for s in schedules:
+                if current_time_str in [t.strip() for t in s.time_slots.split(",") if t.strip()]:
+                    active_compartment_ids.append(s.compartment_id)
+                    triggered = True
+
+            if triggered:
+                is_dispense_window_active = True
+                dispense_start_time = now
+                play_audio("alarm.wav")
+
+            last_dispensed_minute = current_time_str
+            db.close()
+            
+        time.sleep(0.1)
 ```
