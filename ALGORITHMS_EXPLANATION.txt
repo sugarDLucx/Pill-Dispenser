@@ -1,0 +1,120 @@
+SMART PILL DISPENSER - ALGORITHMS & CODE EXPLANATION
+====================================================
+
+This document outlines the core algorithms and logic scripts used in the Smart Pill Dispenser to orchestrate hardware components, network communications, and scheduling.
+
+1. THE MAIN DAEMON LOOP (State Machine Algorithm)
+-------------------------------------------------
+File: backend/hardware_daemon.py
+Function: main_loop()
+
+Description: 
+The system operates on an asynchronous "While True" loop. Instead of blocking the CPU by pausing for events, it continuously evaluates conditions (Time, Hardware Sensors, Network) hundreds of times per second.
+
+Algorithm Logic:
+    while True:
+        now = datetime.now()
+        
+        # 1. Check if the physical dispense button is pressed.
+        if getattr(med_button, 'is_pressed', False):
+            mark_medicine_taken()
+            
+        # 2. Check if a medication window is currently active.
+        if is_dispense_window_active:
+            # Check if 5 minutes (300 seconds) have passed without a button press.
+            if dispense_start_time and (now - dispense_start_time).total_seconds() > 300:
+                handle_missed_medication(schedules)
+            time.sleep(0.1)
+            continue # Skip the rest of the loop to save CPU
+
+        # 3. Check Database for Scheduled Times
+        # If the current HH:MM matches a scheduled pill, trigger the alarm and open the 5-minute window.
+        if current_time_str != last_dispensed_minute:
+            for s in schedules:
+                if current_time_str in s.time_slots.split(","):
+                    # Activate dispensing window
+                    is_dispense_window_active = True
+                    dispense_start_time = now
+                    # Play Audio
+                    play_audio("alarm.wav")
+                    # Break to prevent multiple triggers in the same minute
+                    break
+
+
+2. TEMPERATURE & HUMIDITY COOLING ALGORITHM
+-------------------------------------------
+File: backend/hardware_daemon.py
+Function: temp_monitoring_loop()
+
+Description:
+A secondary thread continuously monitors the DHT11 sensor. It employs a "Cooling Cooldown" algorithm to prevent the fan relay from clicking on and off rapidly when hovering near the threshold temperature (preventing hardware wear).
+
+Algorithm Logic:
+    if current_temperature > 32.0:
+        if can_run: 
+            cooling_active = True
+            last_cooler_run_time = now
+            cooling_relay.on()
+    
+    # If currently cooling, keep cooling until the duration (e.g., 2 minutes) expires
+    if cooling_active:
+        if (now - last_cooler_run_time).total_seconds() >= 120:
+            cooling_active = False
+            cooling_relay.off()
+
+
+3. TELEGRAM POLLING & COMMAND ROUTING
+-------------------------------------
+File: backend/hardware_daemon.py
+Function: telegram_polling_loop()
+
+Description:
+The system bypasses the need for Port Forwarding by using "Long Polling" directly to the Telegram API.
+
+Algorithm Logic:
+    last_update_id = 0
+    while True:
+        # Request messages from Telegram API. The server holds the request open for 10 seconds.
+        url = f"https://api.telegram.org/bot{token}/getUpdates?offset={last_update_id}&timeout=10"
+        response = requests.get(url)
+        
+        for result in response.json()['result']:
+            # Mark message as read
+            last_update_id = result['update_id'] + 1
+            
+            # Extract Chat ID and Text
+            chat_id = "TG_" + str(result['message']['chat']['id'])
+            text = result['message']['text']
+            
+            # Route to the universal Command Parser
+            parse_sms_command(chat_id, text)
+
+
+4. HARDWARE DISPENSING ALGORITHM
+--------------------------------
+File: backend/hardware_daemon.py
+Function: mark_medicine_taken()
+
+Description:
+When the user presses the button during an active window, the I2C PCA9685 Servo Controller rotates specific servos dynamically based on the active compartment IDs.
+
+Algorithm Logic:
+    # Rotate each scheduled servo one by one
+    for comp_id in active_compartment_ids:
+        s = servos.get(comp_id)
+        if s:
+            if comp_id == 10:
+                s.angle = 60 # Drop pill
+                time.sleep(1) # Allow physical travel time
+                s.angle = 110 # Return to resting state
+            elif comp_id == 4:
+                s.angle = 65
+                time.sleep(1)
+                s.angle = 110
+            else:
+                s.angle = 70
+                time.sleep(1)
+                s.angle = 110
+                
+            time.sleep(0.5) 
+            s.angle = None  # Release electrical tension to stop servo jittering
