@@ -354,3 +354,45 @@ def parse_sms_command(sender: str, message: str):
         
     db.close()
 ```
+
+8. MISSED MEDICATION ESCALATION ALGORITHM
+-----------------------------------------
+This algorithm triggers if the patient fails to press the physical hardware button within the 5-minute dispensing window. It aggregates the list of missed medications and escalates the warning to the registered caretakers.
+
+```python
+def handle_missed_medication(schedules):
+    global is_dispense_window_active, active_compartment_ids, dispense_start_time
+    
+    # 1. Reset hardware state machine
+    is_dispense_window_active = False
+    active_compartment_ids = []
+    dispense_start_time = None
+
+    # 2. Trigger audio alarm
+    play_audio("missed_alert.wav")
+
+    db = SessionLocal()
+    settings = db.query(SystemSettings).first()
+    db.close()
+    
+    if not schedules:
+        return
+        
+    # 3. Aggregate list of missed pills
+    names = ", ".join([s.medicine_name for s in schedules])
+    slots = ", ".join([str(s.compartment_id) for s in schedules])
+
+    alert_msg = f"ALERT: Patient missed scheduled medication. Slots: {slots}, Meds: {names}."
+    user_msg = "Reminder: You missed your scheduled medication. Please take it immediately."
+
+    # 4. Route SMS to user
+    if settings.user_mobile:
+        send_sms(settings.user_mobile, user_msg)
+    
+    # 5. Route SMS to all registered caretakers
+    if settings.caretakers:
+        for number in settings.caretakers.split(","):
+            number = number.strip()
+            if number:
+                send_sms(number, alert_msg)
+```
