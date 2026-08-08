@@ -641,6 +641,15 @@ def handle_missed_medication(schedules):
             if number:
                 send_sms(number, alert_msg)
 
+def audio_keepalive_loop():
+    """Plays a silent audio file every 4 minutes to prevent Bluetooth speakers from auto-powering off."""
+    while True:
+        try:
+            play_audio("silence.wav")
+        except Exception:
+            pass
+        time.sleep(240) # Wait 4 minutes
+
 def main_loop():
     global is_dispense_window_active, active_compartment_ids, dispense_start_time
     print("Starting hardware daemon main loop...")
@@ -649,6 +658,7 @@ def main_loop():
     threading.Thread(target=temp_monitoring_loop, daemon=True).start()
     threading.Thread(target=sms_monitoring_loop, daemon=True).start()
     threading.Thread(target=telegram_polling_loop, daemon=True).start()
+    threading.Thread(target=audio_keepalive_loop, daemon=True).start()
     
     last_dispensed_minute = None
 
