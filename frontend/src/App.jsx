@@ -11,6 +11,14 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
+  // Fix Kiosk Memory Leaks: Force a hard refresh every 1 hour
+  useEffect(() => {
+    const reloadTimer = setTimeout(() => {
+      window.location.reload();
+    }, 3600000); // 1 hour
+    return () => clearTimeout(reloadTimer);
+  }, []);
+
   useEffect(() => {
     const loadTemp = async () => {
       const st = await fetchStatus();
